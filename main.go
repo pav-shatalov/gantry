@@ -8,6 +8,7 @@ import (
 	"github.com/gdamore/tcell/v2"
 
 	"gantry/geometry"
+	"gantry/widget/block"
 	"gantry/widget/paragraph"
 	"gantry/widget/selectablelist"
 )
@@ -77,6 +78,9 @@ func (s *store) view() {
 
 	list := selectablelist.New(s.containers, s.selected_container_idx);
 	list.Render(screen, geometry.Position{X: 0, Y: 2})
+
+	block := block.New();
+	block.Render(screen, geometry.Rect{X: 80, Y:0, Width: 100, Height: 5})
 }
 
 func main() {
