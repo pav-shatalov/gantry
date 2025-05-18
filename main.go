@@ -7,8 +7,9 @@ import (
 
 	"github.com/gdamore/tcell/v2"
 
+	"gantry/geometry"
 	"gantry/widget/paragraph"
-	selectablelist "gantry/widget/selctable_list"
+	"gantry/widget/selectablelist"
 )
 
 type surface struct {
@@ -19,34 +20,52 @@ type surface struct {
 type store struct {
 	surface surface
 	screen *tcell.Screen
-	containers []string
+	containers map[int]string
+	selected_container_idx int
 }
 
 type cmd int
 
-const (
-	Resize cmd = iota
-	Exit
-)
+type Command interface{}
 
-type message struct {
-	command cmd
+type ResizeCommand struct {}
+type ExitCommand struct {}
+type SelectNextContainer struct {}
+type SelectPrevContainer struct {}
+
+type Message struct {
+	command Command
 }
 
 func initialState(screen *tcell.Screen, surface surface) store {
-	return store{surface: surface, screen: screen, containers: []string{"Container #1", "Container #2"}}
+	return store{
+		surface: surface,
+		screen: screen,
+		containers: map[int]string{0: "Container #1", 1: "Container #2"},
+	}
 }
 
-func (s *store) update(msg message) {
+func (s *store) update(msg Message) {
 	screen := *s.screen;
-	switch msg.command {
-	case Resize: 
+	cmd := msg.command;
+	switch cmd.(type) {
+	case ResizeCommand: 
 		newWidth, newHeight := screen.Size();
 		s.surface.width = newWidth
 		s.surface.height = newHeight
-	case Exit:
+	case ExitCommand:
 		screen.Fini()
 		os.Exit(0)
+	case SelectNextContainer:
+		_,ok := s.containers[s.selected_container_idx + 1]
+		if ok {
+			s.selected_container_idx = s.selected_container_idx + 1
+		}
+	case SelectPrevContainer:
+		_,ok := s.containers[s.selected_container_idx - 1]
+		if ok {
+			s.selected_container_idx = s.selected_container_idx - 1
+		}
 	}
 }
 
@@ -56,8 +75,8 @@ func (s *store) view() {
 	para := paragraph.New(message)
 	para.Render(screen)
 
-	list := selectablelist.New(s.containers);
-	list.Render(screen)
+	list := selectablelist.New(s.containers, s.selected_container_idx);
+	list.Render(screen, geometry.Position{X: 0, Y: 2})
 }
 
 func main() {
@@ -90,11 +109,22 @@ func main() {
 		case event := <- evChannel:
 			switch ev := event.(type) {
 			case *tcell.EventResize:
-				msg := message{command: Resize}
+				msg := Message{command: ResizeCommand{}}
 				state.update(msg)
 			case *tcell.EventKey:
 				if (ev.Key() == tcell.KeyEsc) {
-					msg := message{command: Exit}
+					msg := Message{command: ExitCommand{}}
+					state.update(msg)
+				}
+
+				if (ev.Key() == tcell.KeyUp) {
+					msg := Message{command: SelectPrevContainer{}}
+
+					state.update(msg)
+				}
+				if (ev.Key() == tcell.KeyDown) {
+					msg := Message{command: SelectNextContainer{}}
+
 					state.update(msg)
 				}
 			}
