@@ -1,27 +1,31 @@
 package paragraph
 
-import "github.com/gdamore/tcell/v2"
+import (
+	"gantry/geometry"
+
+	"github.com/gdamore/tcell/v2"
+)
 
 type Paragraph struct {
 	text string
 }
 
-func (p *Paragraph) Render(screen tcell.Screen) {
+func (p *Paragraph) Render(screen tcell.Screen, area geometry.Rect) {
 	w,h := screen.Size()
-	col := 0
-	row := 0
+	col := area.X
+	row := area.Y
 	for _, c := range p.text {
 		// Move to the next line
 		if (c == '\n') {
 			row++
-			col = 0
+			col = area.X
 			continue
 		}
 
 		// For now just hard wrap
 		if (col > w) {
 			row++;
-			col = 0;
+			col = area.X;
 		}
 
 		// Ignore output if no more space left

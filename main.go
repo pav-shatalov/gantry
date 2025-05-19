@@ -8,18 +8,16 @@ import (
 	"github.com/gdamore/tcell/v2"
 
 	"gantry/geometry"
+	"gantry/layout"
+	"gantry/layout/horizontal"
+
 	"gantry/widget/block"
-	"gantry/widget/paragraph"
-	"gantry/widget/selectablelist"
+	// "gantry/widget/paragraph"
+	// "gantry/widget/selectablelist"
 )
 
-type surface struct {
-	width  int
-	height int
-}
-
 type store struct {
-	surface surface
+	surface geometry.Rect
 	screen *tcell.Screen
 	containers map[int]string
 	selected_container_idx int
@@ -38,7 +36,7 @@ type Message struct {
 	command Command
 }
 
-func initialState(screen *tcell.Screen, surface surface) store {
+func initialState(screen *tcell.Screen, surface geometry.Rect) store {
 	return store{
 		surface: surface,
 		screen: screen,
@@ -52,8 +50,8 @@ func (s *store) update(msg Message) {
 	switch cmd.(type) {
 	case ResizeCommand: 
 		newWidth, newHeight := screen.Size();
-		s.surface.width = newWidth
-		s.surface.height = newHeight
+		s.surface.Width = newWidth
+		s.surface.Height = newHeight
 	case ExitCommand:
 		screen.Fini()
 		os.Exit(0)
@@ -71,16 +69,27 @@ func (s *store) update(msg Message) {
 }
 
 func (s *store) view() {
+	l := horizontal.New(s.surface)
+	l.Add(layout.NewPercentage(20));
+	l.Add(layout.NewPercentage(80));
+	areas := l.Areas()
+	// areas := layout.Areas();
+	// leftArea, rightArea := areas[0], areas[1]
+	// 
 	screen := *s.screen;
-	message := fmt.Sprintf("Screen size: %dx%d\nAnother text", s.surface.width, s.surface.height)
-	para := paragraph.New(message)
-	para.Render(screen)
+	// message := fmt.Sprintf("Area size: %dx%d\nAreas: %+v", areas[1].Width, areas[1].Height, areas)
+	// para := paragraph.New(message)
+	// para.Render(screen, areas[0])
+	//
+	// list := selectablelist.New(s.containers, s.selected_container_idx);
+	// list.Render(screen, geometry.Position{X: 0, Y: 2})
+	//
+	block1 := block.New();
+	block1.Render(screen, areas[1])
+	
+	block2 := block.New();
+	block2.Render(screen, areas[0])
 
-	list := selectablelist.New(s.containers, s.selected_container_idx);
-	list.Render(screen, geometry.Position{X: 0, Y: 2})
-
-	block := block.New();
-	block.Render(screen, geometry.Rect{X: 80, Y:0, Width: 100, Height: 5})
 }
 
 func main() {
@@ -95,7 +104,8 @@ func main() {
 	}
 
 	width, height := screen.Size()
-	surface := surface{width: int(width), height: int(height)}
+	surface := geometry.Rect{X: 0, Y: 0, Width: int(width), Height: int(height)}
+	fmt.Printf("Surf: %+v", surface)
 	state := initialState(&screen, surface)
 
 	evChannel := make(chan tcell.Event, 10)
