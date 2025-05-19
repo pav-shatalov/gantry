@@ -48,8 +48,7 @@ func ioctlWriteTermios() uintptr {
 }
 
 func GetSize(fd uintptr) (uint16, uint16) {
-	// todo handle error 
-	uws, _:= unix.IoctlGetWinsize(int(fd), unix.TIOCGWINSZ)
+	// todo handle error
+	uws, _ := unix.IoctlGetWinsize(int(fd), unix.TIOCGWINSZ)
 	return uws.Row, uws.Col
 }
-

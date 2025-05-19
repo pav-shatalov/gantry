@@ -11,7 +11,7 @@ const (
 
 type Constraint struct {
 	constraintType ConstraintType
-	value int
+	value          int
 }
 
 func NewMin(value int) Constraint {

@@ -11,7 +11,7 @@ import (
 )
 
 type SelectableList struct {
-	options map[int]string
+	options  map[int]string
 	selected int
 }
 
@@ -24,13 +24,13 @@ func (s *SelectableList) Render(screen tcell.Screen, pos geometry.Position) {
 	row := pos.Y
 
 	// Let's get a slice of all keys
-    keySlice := make([]int, 0)
-    for key := range s.options {
-        keySlice = append(keySlice , key)
-    }
+	keySlice := make([]int, 0)
+	for key := range s.options {
+		keySlice = append(keySlice, key)
+	}
 
 	// Now sort the slice
-    sort.Ints(keySlice)
+	sort.Ints(keySlice)
 
 	for _, itemIdx := range keySlice {
 		item := s.options[itemIdx]
@@ -44,8 +44,8 @@ func (s *SelectableList) Render(screen tcell.Screen, pos geometry.Position) {
 		if !isSelected {
 			sp.Padding(2)
 		}
-		sp.Render(screen, geometry.Position{X: col, Y: row});
-		
+		sp.Render(screen, geometry.Position{X: col, Y: row})
+
 		col = 0
 		row++
 	}

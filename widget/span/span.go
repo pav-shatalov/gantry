@@ -7,7 +7,7 @@ import (
 )
 
 type Span struct {
-	text string
+	text    string
 	padding int
 }
 
@@ -19,15 +19,15 @@ func (s *Span) Render(screen tcell.Screen, pos geometry.Position) {
 	row := pos.Y
 	col := pos.X
 	text := ""
-	
+
 	for range s.padding {
 		text += " "
 	}
-	
+
 	text += s.text
 
 	for _, c := range text {
-		screen.SetContent(col, row, c, []rune{}, tcell.StyleDefault);
+		screen.SetContent(col, row, c, []rune{}, tcell.StyleDefault)
 		col++
 	}
 }

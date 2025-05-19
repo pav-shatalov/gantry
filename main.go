@@ -17,9 +17,9 @@ import (
 )
 
 type store struct {
-	surface geometry.Rect
-	screen *tcell.Screen
-	containers map[int]string
+	surface                geometry.Rect
+	screen                 *tcell.Screen
+	containers             map[int]string
 	selected_container_idx int
 }
 
@@ -27,10 +27,10 @@ type cmd int
 
 type Command interface{}
 
-type ResizeCommand struct {}
-type ExitCommand struct {}
-type SelectNextContainer struct {}
-type SelectPrevContainer struct {}
+type ResizeCommand struct{}
+type ExitCommand struct{}
+type SelectNextContainer struct{}
+type SelectPrevContainer struct{}
 
 type Message struct {
 	command Command
@@ -38,30 +38,30 @@ type Message struct {
 
 func initialState(screen *tcell.Screen, surface geometry.Rect) store {
 	return store{
-		surface: surface,
-		screen: screen,
+		surface:    surface,
+		screen:     screen,
 		containers: map[int]string{0: "Container #1", 1: "Container #2"},
 	}
 }
 
 func (s *store) update(msg Message) {
-	screen := *s.screen;
-	cmd := msg.command;
+	screen := *s.screen
+	cmd := msg.command
 	switch cmd.(type) {
-	case ResizeCommand: 
-		newWidth, newHeight := screen.Size();
+	case ResizeCommand:
+		newWidth, newHeight := screen.Size()
 		s.surface.Width = newWidth
 		s.surface.Height = newHeight
 	case ExitCommand:
 		screen.Fini()
 		os.Exit(0)
 	case SelectNextContainer:
-		_,ok := s.containers[s.selected_container_idx + 1]
+		_, ok := s.containers[s.selected_container_idx+1]
 		if ok {
 			s.selected_container_idx = s.selected_container_idx + 1
 		}
 	case SelectPrevContainer:
-		_,ok := s.containers[s.selected_container_idx - 1]
+		_, ok := s.containers[s.selected_container_idx-1]
 		if ok {
 			s.selected_container_idx = s.selected_container_idx - 1
 		}
@@ -70,24 +70,20 @@ func (s *store) update(msg Message) {
 
 func (s *store) view() {
 	l := horizontal.New(s.surface)
-	l.Add(layout.NewPercentage(20));
-	l.Add(layout.NewPercentage(80));
+	l.Add(layout.NewPercentage(20))
+	l.Add(layout.NewPercentage(80))
 	areas := l.Areas()
 	// areas := layout.Areas();
 	// leftArea, rightArea := areas[0], areas[1]
-	// 
-	screen := *s.screen;
-	// message := fmt.Sprintf("Area size: %dx%d\nAreas: %+v", areas[1].Width, areas[1].Height, areas)
-	// para := paragraph.New(message)
-	// para.Render(screen, areas[0])
 	//
+	screen := *s.screen
 	// list := selectablelist.New(s.containers, s.selected_container_idx);
 	// list.Render(screen, geometry.Position{X: 0, Y: 2})
 	//
-	block1 := block.New();
+	block1 := block.New()
 	block1.Render(screen, areas[1])
-	
-	block2 := block.New();
+
+	block2 := block.New()
 	block2.Render(screen, areas[0])
 
 }
@@ -120,23 +116,23 @@ func main() {
 	// main loop
 	for {
 		select {
-		case event := <- evChannel:
+		case event := <-evChannel:
 			switch ev := event.(type) {
 			case *tcell.EventResize:
 				msg := Message{command: ResizeCommand{}}
 				state.update(msg)
 			case *tcell.EventKey:
-				if (ev.Key() == tcell.KeyEsc) {
+				if ev.Key() == tcell.KeyEsc {
 					msg := Message{command: ExitCommand{}}
 					state.update(msg)
 				}
 
-				if (ev.Key() == tcell.KeyUp) {
+				if ev.Key() == tcell.KeyUp {
 					msg := Message{command: SelectPrevContainer{}}
 
 					state.update(msg)
 				}
-				if (ev.Key() == tcell.KeyDown) {
+				if ev.Key() == tcell.KeyDown {
 					msg := Message{command: SelectNextContainer{}}
 
 					state.update(msg)

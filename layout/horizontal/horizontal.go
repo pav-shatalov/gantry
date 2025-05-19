@@ -8,12 +8,12 @@ import (
 )
 
 type Horizontal struct {
-	area geometry.Rect
+	area  geometry.Rect
 	items []layout.Constraint
 }
 
 func New(area geometry.Rect) Horizontal {
-	return Horizontal{ area: area }
+	return Horizontal{area: area}
 }
 
 // func (h *Horizontal) Items() []layout.Constraint {
@@ -25,9 +25,9 @@ func (h *Horizontal) Add(c layout.Constraint) {
 }
 
 func (h *Horizontal) Areas() []geometry.Rect {
-	var areas []geometry.Rect;
-	x := h.area.X;
-	y := h.area.Y;
+	var areas []geometry.Rect
+	x := h.area.X
+	y := h.area.Y
 
 	solver := cassowary.NewSolver()
 	containerWidth := h.area.Width
@@ -41,27 +41,26 @@ func (h *Horizontal) Areas() []geometry.Rect {
 			target := h.area.Width * item.Value() / 100
 			// log.Printf("!!!!target w:%+v, val:%+v, target: %+v", h.area.Width, item.Value() / 100.0, target)
 			solver.AddConstraintWithPriority(
-				cassowary.Medium, 
-				cassowary.NewConstraint(cassowary.EQ, float64(-1 * target), v.T(1)),
+				cassowary.Medium,
+				cassowary.NewConstraint(cassowary.EQ, float64(-1*target), v.T(1)),
 			)
 			totalWidthTerms = append(totalWidthTerms, v.T(1))
 		}
 		vars = append(vars, v)
 	}
 
-
 	solver.AddConstraintWithPriority(
 		cassowary.Strong,
-		cassowary.NewConstraint(cassowary.EQ, float64(-1 * containerWidth), totalWidthTerms...),
+		cassowary.NewConstraint(cassowary.EQ, float64(-1*containerWidth), totalWidthTerms...),
 	)
 
 	for idx := range h.items {
 		v := vars[idx]
 		width := int(math.Round(solver.Val(v)))
 		newArea := geometry.Rect{
-			X: x,
-			Y: y,
-			Width: width,
+			X:      x,
+			Y:      y,
+			Width:  width,
 			Height: h.area.Height,
 		}
 
@@ -69,5 +68,5 @@ func (h *Horizontal) Areas() []geometry.Rect {
 		x += width
 	}
 
-	return areas;
+	return areas
 }

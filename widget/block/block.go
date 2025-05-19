@@ -7,36 +7,36 @@ import (
 )
 
 type borders struct {
-	topLeft rune
-	top rune
-	topRight rune
-	right rune
+	topLeft     rune
+	top         rune
+	topRight    rune
+	right       rune
 	bottomRight rune
-	bottom rune
-	bottomLeft rune
-	left rune
+	bottom      rune
+	bottomLeft  rune
+	left        rune
 }
 
 var SquareBorders = borders{
-	topLeft: '┌',
-	top: '─',
-	topRight: '┐',
-	right: '│',
+	topLeft:     '┌',
+	top:         '─',
+	topRight:    '┐',
+	right:       '│',
 	bottomRight: '┘',
-	bottom: '─',
-	bottomLeft: '└',
-	left: '│',
+	bottom:      '─',
+	bottomLeft:  '└',
+	left:        '│',
 }
 
 var RoundBorders = borders{
-	topLeft: '╭',
-	top: '─',
-	topRight: '╮',
-	right: '│',
+	topLeft:     '╭',
+	top:         '─',
+	topRight:    '╮',
+	right:       '│',
 	bottomRight: '╯',
-	bottom: '─',
-	bottomLeft: '╰',
-	left: '│',
+	bottom:      '─',
+	bottomLeft:  '╰',
+	left:        '│',
 }
 
 type Block struct {
@@ -44,7 +44,7 @@ type Block struct {
 }
 
 func New() Block {
-	return Block{title:""}
+	return Block{title: ""}
 }
 
 func (b *Block) Render(screen tcell.Screen, area geometry.Rect) {
@@ -53,11 +53,11 @@ func (b *Block) Render(screen tcell.Screen, area geometry.Rect) {
 	borders := RoundBorders
 	for range area.Height {
 		isFirstRow := row == area.Y
-		isLastRow := row == area.Y + area.Height - 1
+		isLastRow := row == area.Y+area.Height-1
 		for range area.Width {
 			r := ' '
 			isLeftEdge := col == area.X
-			isRightEdge := col == area.X + area.Width - 1
+			isRightEdge := col == area.X+area.Width-1
 			if isFirstRow {
 				r = borders.top
 				if isLeftEdge {
