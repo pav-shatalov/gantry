@@ -9,8 +9,6 @@ import (
 
 	"gantry/geometry"
 	"gantry/layout"
-	"gantry/layout/horizontal"
-
 	"gantry/widget/block"
 	// "gantry/widget/paragraph"
 	// "gantry/widget/selectablelist"
@@ -69,11 +67,10 @@ func (s *store) update(msg Message) {
 }
 
 func (s *store) view() {
-	l := horizontal.New(s.surface)
+	l := layout.New(s.surface, layout.Vertical)
 	l.Add(layout.NewPercentage(20))
 	l.Add(layout.NewPercentage(80))
 	areas := l.Areas()
-	// areas := layout.Areas();
 	// leftArea, rightArea := areas[0], areas[1]
 	//
 	screen := *s.screen
