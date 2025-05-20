@@ -67,21 +67,33 @@ func (s *store) update(msg Message) {
 }
 
 func (s *store) view() {
-	l := layout.New(s.surface, layout.Vertical)
-	l.Add(layout.NewPercentage(20))
-	l.Add(layout.NewPercentage(80))
-	areas := l.Areas()
+	globalLayout := layout.NewHorizontal(s.surface)
+	globalLayout.Add(layout.NewPercentage(20))
+	globalLayout.Add(layout.NewPercentage(80))
+	globalAreas := globalLayout.Areas()
+
+	innerLayout := layout.NewVertical(globalAreas[1])
+	innerLayout.Add(layout.NewPercentage(50))
+	innerLayout.Add(layout.NewPercentage(50))
+	innerAreas := innerLayout.Areas()
+
 	// leftArea, rightArea := areas[0], areas[1]
 	//
 	screen := *s.screen
 	// list := selectablelist.New(s.containers, s.selected_container_idx);
 	// list.Render(screen, geometry.Position{X: 0, Y: 2})
 	//
+	aside := block.New()
+	aside.Render(screen, globalAreas[0])
+
+	// mainBlock := block.New()
+	// mainBlock.Render(screen, globalAreas[1])
+
 	block1 := block.New()
-	block1.Render(screen, areas[1])
+	block1.Render(screen, innerAreas[0])
 
 	block2 := block.New()
-	block2.Render(screen, areas[0])
+	block2.Render(screen, innerAreas[1])
 
 }
 

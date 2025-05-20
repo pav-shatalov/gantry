@@ -27,6 +27,14 @@ func New(area geometry.Rect, d Direction) Layout {
 	}
 }
 
+func NewHorizontal(area geometry.Rect) Layout {
+	return New(area, Horizontal)
+}
+
+func NewVertical(area geometry.Rect) Layout {
+	return New(area, Vertical)
+}
+
 func (l *Layout) Add(c Constraint) {
 	l.items = append(l.items, c)
 }
