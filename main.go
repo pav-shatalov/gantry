@@ -90,10 +90,10 @@ func (s *store) view() {
 	// mainBlock.Render(screen, globalAreas[1])
 
 	block1 := block.New()
-	block1.Render(screen, innerAreas[0])
+	block1.Title("Block 1").Render(screen, innerAreas[0])
 
 	block2 := block.New()
-	block2.Render(screen, innerAreas[1])
+	block2.Title("Block 2").Render(screen, innerAreas[1])
 
 }
 
