@@ -1,10 +1,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
+	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/client"
 	"github.com/gdamore/tcell/v2"
 
 	"gantry/geometry"
@@ -15,10 +19,10 @@ import (
 )
 
 type store struct {
-	surface             geometry.Rect
-	screen              *tcell.Screen
-	containers          map[string]string
-	selectedContainerId int
+	surface              geometry.Rect
+	screen               *tcell.Screen
+	containers           []ContainerInfo
+	selectedContainerIdx int
 }
 
 type cmd int
@@ -35,11 +39,16 @@ type Message struct {
 	command Command
 }
 
+type ContainerInfo struct {
+	name string
+	id   string
+}
+
 func initialState(screen *tcell.Screen, surface geometry.Rect) store {
 	return store{
 		surface:    surface,
 		screen:     screen,
-		containers: map[string]string{"123": "Container #1", "abc": "Container #2"},
+		containers: []ContainerInfo{},
 	}
 }
 
@@ -54,34 +63,29 @@ func (s *store) update(msg Message) {
 	case ExitCommand:
 		screen.Fini()
 		os.Exit(0)
-	// case SelectNextContainer:
-	// 	_, ok := s.containers[s.selectedContainerId+1]
-	// 	if ok {
-	// 		s.selectedContainerId = s.selectedContainerId + 1
-	// 	}
-	// case SelectPrevContainer:
-	// 	_, ok := s.containers[s.selectedContainerId-1]
-	// 	if ok {
-	// 		s.selectedContainerId = s.selectedContainerId - 1
-	// 	}
+	case SelectNextContainer:
+		if len(s.containers) > s.selectedContainerIdx+1 {
+			s.selectedContainerIdx++
+		}
+	case SelectPrevContainer:
+		if s.selectedContainerIdx >= 1 {
+			s.selectedContainerIdx--
+		}
 	case LoadContainerList:
-		// cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
-		// if err != nil {
-		// 	panic(err)
-		// }
-		// containers, err := cli.ContainerList(context.Background(), container.ListOptions{})
-		// if err != nil {
-		// 	panic(err)
-		// }
-		//
-		// for _, ctr := range containers {
-		// 	for k := range s.containers {
-		// 		delete(s.containers, k)
-		// 	}
-		//
-		// 	s.containers[ctr.ID] = strings.Join(ctr.Names, "|")
-		// }
+		cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+		if err != nil {
+			panic(err)
+		}
+		defer cli.Close()
 
+		containers, err := cli.ContainerList(context.Background(), container.ListOptions{})
+		if err != nil {
+			panic(err)
+		}
+
+		for _, ctr := range containers {
+			s.containers = append(s.containers, ContainerInfo{id: ctr.ID, name: strings.Join(ctr.Names, "|")})
+		}
 	}
 }
 
@@ -96,17 +100,19 @@ func (s *store) view() {
 	innerLayout.Add(layout.NewPercentage(50))
 	innerAreas := innerLayout.Areas()
 
-	// leftArea, rightArea := areas[0], areas[1]
-	//
 	screen := *s.screen
 	borderStyle := tcell.StyleDefault.Foreground(tcell.ColorBlack)
-	// list := selectablelist.New(s.containers, s.selected_container_idx);
-	// list.Render(screen, geometry.Position{X: 0, Y: 2})
-	//
+
 	aside := block.New()
 	aside.BorderStyle(borderStyle).Render(screen, globalAreas[0])
 
-	list := selectablelist.New(s.containers, s.selectedContainerId)
+	var containerNames []string
+
+	for _, containerInfo := range s.containers {
+		containerNames = append(containerNames, containerInfo.name)
+	}
+
+	list := selectablelist.New(containerNames, s.selectedContainerIdx)
 	list.Render(screen, aside.InnerArea(globalAreas[0]))
 
 	block1 := block.New()

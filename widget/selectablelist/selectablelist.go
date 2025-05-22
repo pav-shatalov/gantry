@@ -10,26 +10,17 @@ import (
 )
 
 type SelectableList struct {
-	options  map[string]string
+	options  []string
 	selected any
 }
 
-func New(options map[string]string, selected_idx int) SelectableList {
-	return SelectableList{options: options, selected: selected_idx}
+func New(options []string, selectedIdx int) SelectableList {
+	return SelectableList{options: options, selected: selectedIdx}
 }
 
 func (s *SelectableList) Render(screen tcell.Screen, area geometry.Rect) {
 	col := area.X
 	row := area.Y
-
-	// // Let's get a slice of all keys
-	// keySlice := make([]int, 0)
-	// for key := range s.options {
-	// 	keySlice = append(keySlice, key)
-	// }
-	//
-	// // Now sort the slice
-	// sort.Ints(keySlice)
 
 	for itemIdx, item := range s.options {
 		isSelected := itemIdx == s.selected
