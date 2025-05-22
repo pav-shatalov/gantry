@@ -10,15 +10,15 @@ import (
 	"gantry/geometry"
 	"gantry/layout"
 	"gantry/widget/block"
-	// "gantry/widget/paragraph"
+	"gantry/widget/selectablelist"
 	// "gantry/widget/selectablelist"
 )
 
 type store struct {
-	surface                geometry.Rect
-	screen                 *tcell.Screen
-	containers             map[int]string
-	selected_container_idx int
+	surface             geometry.Rect
+	screen              *tcell.Screen
+	containers          map[string]string
+	selectedContainerId int
 }
 
 type cmd int
@@ -29,6 +29,7 @@ type ResizeCommand struct{}
 type ExitCommand struct{}
 type SelectNextContainer struct{}
 type SelectPrevContainer struct{}
+type LoadContainerList struct{}
 
 type Message struct {
 	command Command
@@ -38,7 +39,7 @@ func initialState(screen *tcell.Screen, surface geometry.Rect) store {
 	return store{
 		surface:    surface,
 		screen:     screen,
-		containers: map[int]string{0: "Container #1", 1: "Container #2"},
+		containers: map[string]string{"123": "Container #1", "abc": "Container #2"},
 	}
 }
 
@@ -53,16 +54,34 @@ func (s *store) update(msg Message) {
 	case ExitCommand:
 		screen.Fini()
 		os.Exit(0)
-	case SelectNextContainer:
-		_, ok := s.containers[s.selected_container_idx+1]
-		if ok {
-			s.selected_container_idx = s.selected_container_idx + 1
-		}
-	case SelectPrevContainer:
-		_, ok := s.containers[s.selected_container_idx-1]
-		if ok {
-			s.selected_container_idx = s.selected_container_idx - 1
-		}
+	// case SelectNextContainer:
+	// 	_, ok := s.containers[s.selectedContainerId+1]
+	// 	if ok {
+	// 		s.selectedContainerId = s.selectedContainerId + 1
+	// 	}
+	// case SelectPrevContainer:
+	// 	_, ok := s.containers[s.selectedContainerId-1]
+	// 	if ok {
+	// 		s.selectedContainerId = s.selectedContainerId - 1
+	// 	}
+	case LoadContainerList:
+		// cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+		// if err != nil {
+		// 	panic(err)
+		// }
+		// containers, err := cli.ContainerList(context.Background(), container.ListOptions{})
+		// if err != nil {
+		// 	panic(err)
+		// }
+		//
+		// for _, ctr := range containers {
+		// 	for k := range s.containers {
+		// 		delete(s.containers, k)
+		// 	}
+		//
+		// 	s.containers[ctr.ID] = strings.Join(ctr.Names, "|")
+		// }
+
 	}
 }
 
@@ -80,21 +99,21 @@ func (s *store) view() {
 	// leftArea, rightArea := areas[0], areas[1]
 	//
 	screen := *s.screen
+	borderStyle := tcell.StyleDefault.Foreground(tcell.ColorBlack)
 	// list := selectablelist.New(s.containers, s.selected_container_idx);
 	// list.Render(screen, geometry.Position{X: 0, Y: 2})
 	//
 	aside := block.New()
-	aside.Render(screen, globalAreas[0])
+	aside.BorderStyle(borderStyle).Render(screen, globalAreas[0])
 
-	// mainBlock := block.New()
-	// mainBlock.Render(screen, globalAreas[1])
+	list := selectablelist.New(s.containers, s.selectedContainerId)
+	list.Render(screen, aside.InnerArea(globalAreas[0]))
 
 	block1 := block.New()
-	block1.Title("Block 1").Render(screen, innerAreas[0])
+	block1.Title("Block 1").BorderStyle(borderStyle).Render(screen, innerAreas[0])
 
 	block2 := block.New()
-	block2.Title("Block 2").Render(screen, innerAreas[1])
-
+	block2.Title("Block 2").BorderStyle(borderStyle).Render(screen, innerAreas[1])
 }
 
 func main() {
@@ -112,6 +131,7 @@ func main() {
 	surface := geometry.Rect{X: 0, Y: 0, Width: int(width), Height: int(height)}
 	fmt.Printf("Surf: %+v", surface)
 	state := initialState(&screen, surface)
+	state.update(Message{command: LoadContainerList{}})
 
 	evChannel := make(chan tcell.Event, 10)
 
@@ -149,7 +169,6 @@ func main() {
 			}
 		default:
 		}
-		screen.Clear()
 		state.view()
 		screen.Show()
 		time.Sleep(50 * time.Millisecond)

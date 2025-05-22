@@ -2,7 +2,6 @@ package selectablelist
 
 import (
 	"fmt"
-	"sort"
 
 	"gantry/geometry"
 	"gantry/widget/span"
@@ -11,29 +10,28 @@ import (
 )
 
 type SelectableList struct {
-	options  map[int]string
-	selected int
+	options  map[string]string
+	selected any
 }
 
-func New(options map[int]string, selected_idx int) SelectableList {
+func New(options map[string]string, selected_idx int) SelectableList {
 	return SelectableList{options: options, selected: selected_idx}
 }
 
-func (s *SelectableList) Render(screen tcell.Screen, pos geometry.Position) {
-	col := pos.X
-	row := pos.Y
+func (s *SelectableList) Render(screen tcell.Screen, area geometry.Rect) {
+	col := area.X
+	row := area.Y
 
-	// Let's get a slice of all keys
-	keySlice := make([]int, 0)
-	for key := range s.options {
-		keySlice = append(keySlice, key)
-	}
+	// // Let's get a slice of all keys
+	// keySlice := make([]int, 0)
+	// for key := range s.options {
+	// 	keySlice = append(keySlice, key)
+	// }
+	//
+	// // Now sort the slice
+	// sort.Ints(keySlice)
 
-	// Now sort the slice
-	sort.Ints(keySlice)
-
-	for _, itemIdx := range keySlice {
-		item := s.options[itemIdx]
+	for itemIdx, item := range s.options {
 		isSelected := itemIdx == s.selected
 		if isSelected {
 			marker := span.New(fmt.Sprintf("> "))
@@ -46,7 +44,7 @@ func (s *SelectableList) Render(screen tcell.Screen, pos geometry.Position) {
 		}
 		sp.Render(screen, geometry.Position{X: col, Y: row})
 
-		col = 0
+		col = area.X
 		row++
 	}
 }

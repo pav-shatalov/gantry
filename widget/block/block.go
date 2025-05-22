@@ -40,15 +40,33 @@ var RoundBorders = borders{
 }
 
 type Block struct {
-	title string
+	title       string
+	borders     borders
+	titleStyle  tcell.Style
+	borderStyle tcell.Style
 }
 
 func New() Block {
-	return Block{title: ""}
+	return Block{
+		title:       "",
+		borders:     RoundBorders,
+		titleStyle:  tcell.StyleDefault,
+		borderStyle: tcell.StyleDefault,
+	}
 }
 
 func (b *Block) Title(title string) *Block {
 	b.title = title
+	return b
+}
+
+func (b *Block) BorderStyle(style tcell.Style) *Block {
+	b.borderStyle = style
+	return b
+}
+
+func (b *Block) TitleStyle(style tcell.Style) *Block {
+	b.titleStyle = style
 	return b
 }
 
@@ -69,10 +87,9 @@ func (b *Block) Render(screen tcell.Screen, area geometry.Rect) {
 func (b *Block) renderLeftSide(screen tcell.Screen, area geometry.Rect) {
 	col := area.X
 	row := area.Y + 1
-	borders := RoundBorders
-	r := borders.right
+	r := b.borders.right
 	for range area.Height - 2 {
-		screen.SetContent(col, row, r, []rune{}, tcell.StyleDefault)
+		screen.SetContent(col, row, r, []rune{}, b.borderStyle)
 		row++
 	}
 }
@@ -80,10 +97,9 @@ func (b *Block) renderLeftSide(screen tcell.Screen, area geometry.Rect) {
 func (b *Block) renderTopSide(screen tcell.Screen, area geometry.Rect) {
 	col := area.X + 1
 	row := area.Y
-	borders := RoundBorders
-	r := borders.top
+	r := b.borders.top
 	for range area.Width - 2 {
-		screen.SetContent(col, row, r, []rune{}, tcell.StyleDefault)
+		screen.SetContent(col, row, r, []rune{}, b.borderStyle)
 		col++
 	}
 }
@@ -91,11 +107,10 @@ func (b *Block) renderTopSide(screen tcell.Screen, area geometry.Rect) {
 func (b *Block) renderRightSide(screen tcell.Screen, area geometry.Rect) {
 	col := area.X + area.Width - 1
 	row := area.Y + 1
-	borders := RoundBorders
-	r := borders.right
+	r := b.borders.right
 
 	for range area.Height - 2 {
-		screen.SetContent(col, row, r, []rune{}, tcell.StyleDefault)
+		screen.SetContent(col, row, r, []rune{}, b.borderStyle)
 		row++
 	}
 }
@@ -103,29 +118,52 @@ func (b *Block) renderRightSide(screen tcell.Screen, area geometry.Rect) {
 func (b *Block) renderBottomSide(screen tcell.Screen, area geometry.Rect) {
 	col := area.X + 1
 	row := area.Y + area.Height - 1
-	borders := RoundBorders
-	r := borders.bottom
+	r := b.borders.bottom
 
 	for range area.Width - 2 {
-		screen.SetContent(col, row, r, []rune{}, tcell.StyleDefault)
+		screen.SetContent(col, row, r, []rune{}, b.borderStyle)
 		col++
 	}
 }
 
 func (b *Block) renderTopLeftCorner(screen tcell.Screen, area geometry.Rect) {
-	screen.SetContent(area.X, area.Y, RoundBorders.topLeft, []rune{}, tcell.StyleDefault)
+	screen.SetContent(
+		area.X,
+		area.Y,
+		b.borders.topLeft,
+		[]rune{},
+		b.borderStyle,
+	)
 }
 
 func (b *Block) renderTopRightCorner(screen tcell.Screen, area geometry.Rect) {
-	screen.SetContent(area.X+area.Width-1, area.Y, RoundBorders.topRight, []rune{}, tcell.StyleDefault)
+	screen.SetContent(
+		area.X+area.Width-1,
+		area.Y,
+		b.borders.topRight,
+		[]rune{},
+		b.borderStyle,
+	)
 }
 
 func (b *Block) renderBottomRightCorner(screen tcell.Screen, area geometry.Rect) {
-	screen.SetContent(area.X+area.Width-1, area.Y+area.Height-1, RoundBorders.bottomRight, []rune{}, tcell.StyleDefault)
+	screen.SetContent(
+		area.X+area.Width-1,
+		area.Y+area.Height-1,
+		b.borders.bottomRight,
+		[]rune{},
+		b.borderStyle,
+	)
 }
 
 func (b *Block) renderBottomLeftCorner(screen tcell.Screen, area geometry.Rect) {
-	screen.SetContent(area.X, area.Y+area.Height-1, RoundBorders.bottomLeft, []rune{}, tcell.StyleDefault)
+	screen.SetContent(
+		area.X,
+		area.Y+area.Height-1,
+		b.borders.bottomLeft,
+		[]rune{},
+		b.borderStyle,
+	)
 }
 
 func (b *Block) renderTitle(screen tcell.Screen, area geometry.Rect) {
@@ -136,7 +174,16 @@ func (b *Block) renderTitle(screen tcell.Screen, area geometry.Rect) {
 	row := area.Y
 	title := " " + b.title + " "
 	for _, c := range title {
-		screen.SetContent(col, row, c, []rune{}, tcell.StyleDefault)
+		screen.SetContent(col, row, c, []rune{}, b.titleStyle)
 		col++
+	}
+}
+
+func (b *Block) InnerArea(area geometry.Rect) geometry.Rect {
+	return geometry.Rect{
+		X:      area.X + 1,
+		Y:      area.Y + 1,
+		Width:  area.Width - 2,
+		Height: area.Height - 2,
 	}
 }
