@@ -13,7 +13,7 @@ import (
 	"gantry/widget"
 )
 
-func view(_ ApplicationState, screen tcell.Screen) {
+func view(s ApplicationState, screen tcell.Screen) {
 	width, height := screen.Size()
 	surface := geometry.Rect{X: 0, Y: 0, Width: width, Height: height}
 
@@ -24,9 +24,14 @@ func view(_ ApplicationState, screen tcell.Screen) {
 	}
 	areas := layout.NewVertical(surface).Constraints(constraints).Areas()
 
+	containerListText := ""
+	for _, ctr := range s.containers {
+		containerListText += fmt.Sprintf("Name: %s; Image: %s\n", ctr.Name, ctr.Image)
+	}
+
 	topArea := widget.NewParagraph("Top")
-	midArea := widget.NewParagraph("Middle")
-	bottomArea := widget.NewParagraph("Bottom")
+	midArea := widget.NewParagraph(containerListText)
+	bottomArea := widget.NewParagraph(fmt.Sprintf("Last KeyPress: %s; Debug: %s", s.lastKey, s.debug))
 
 	topArea.Render(screen, areas[0])
 	midArea.Render(screen, areas[1])
@@ -34,7 +39,11 @@ func view(_ ApplicationState, screen tcell.Screen) {
 }
 
 func main() {
-	state := NewState()
+	state, err := NewState()
+	if err != nil {
+		log.Fatal(err)
+	}
+	state = state.Update(LoadContainerListMsg{})
 	terminal, err := tui.InitTerminal()
 	if err != nil {
 		log.Fatal(err)
@@ -71,8 +80,12 @@ func handleEvent(terminal tui.Terminal) Msg {
 	case event := <-terminal.EventChannel:
 		switch ev := event.(type) {
 		case *tcell.EventKey:
+			// Quit application
 			if ev.Key() == tcell.KeyEsc || ev.Key() == tcell.KeyCtrlC || ev.Rune() == 'q' {
 				msg = ExitMsg{}
+			} else {
+				// Pass keypress to application
+				msg = KeyPressMsg{KeyString: ev.Name()}
 			}
 		}
 	default:
