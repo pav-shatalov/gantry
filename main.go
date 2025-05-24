@@ -1,95 +1,25 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"os"
-	"strings"
 	"time"
 
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/client"
 	"github.com/gdamore/tcell/v2"
 
 	"gantry/geometry"
 	"gantry/layout"
 	"gantry/widget/block"
+	"gantry/widget/paragraph"
 	"gantry/widget/selectablelist"
-	// "gantry/widget/selectablelist"
 )
-
-type store struct {
-	surface              geometry.Rect
-	screen               *tcell.Screen
-	containers           []ContainerInfo
-	selectedContainerIdx int
-}
-
-type cmd int
-
-type Command interface{}
-
-type ResizeCommand struct{}
-type ExitCommand struct{}
-type SelectNextContainer struct{}
-type SelectPrevContainer struct{}
-type LoadContainerList struct{}
-
-type Message struct {
-	command Command
-}
 
 type ContainerInfo struct {
 	name string
 	id   string
 }
 
-func initialState(screen *tcell.Screen, surface geometry.Rect) store {
-	return store{
-		surface:    surface,
-		screen:     screen,
-		containers: []ContainerInfo{},
-	}
-}
-
-func (s *store) update(msg Message) {
-	screen := *s.screen
-	cmd := msg.command
-	switch cmd.(type) {
-	case ResizeCommand:
-		newWidth, newHeight := screen.Size()
-		s.surface.Width = newWidth
-		s.surface.Height = newHeight
-	case ExitCommand:
-		screen.Fini()
-		os.Exit(0)
-	case SelectNextContainer:
-		if len(s.containers) > s.selectedContainerIdx+1 {
-			s.selectedContainerIdx++
-		}
-	case SelectPrevContainer:
-		if s.selectedContainerIdx >= 1 {
-			s.selectedContainerIdx--
-		}
-	case LoadContainerList:
-		cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
-		if err != nil {
-			panic(err)
-		}
-		defer cli.Close()
-
-		containers, err := cli.ContainerList(context.Background(), container.ListOptions{})
-		if err != nil {
-			panic(err)
-		}
-
-		for _, ctr := range containers {
-			s.containers = append(s.containers, ContainerInfo{id: ctr.ID, name: strings.Join(ctr.Names, "|")})
-		}
-	}
-}
-
-func (s *store) view() {
+func (s *Store) view() {
 	globalLayout := layout.NewHorizontal(s.surface)
 	globalLayout.Add(layout.NewPercentage(20))
 	globalLayout.Add(layout.NewPercentage(80))
@@ -118,8 +48,14 @@ func (s *store) view() {
 	block1 := block.New()
 	block1.Title("Block 1").BorderStyle(borderStyle).Render(screen, innerAreas[0])
 
+	statsParagraph := paragraph.New(fmt.Sprintf("STATS: %+v", s.containerStats))
+	statsParagraph.Render(screen, block1.InnerArea(innerAreas[0]))
+
 	block2 := block.New()
 	block2.Title("Block 2").BorderStyle(borderStyle).Render(screen, innerAreas[1])
+
+	debugParagraph := paragraph.New(s.debug)
+	debugParagraph.Render(screen, block2.InnerArea(innerAreas[1]))
 }
 
 func main() {
@@ -136,7 +72,7 @@ func main() {
 	width, height := screen.Size()
 	surface := geometry.Rect{X: 0, Y: 0, Width: int(width), Height: int(height)}
 	fmt.Printf("Surf: %+v", surface)
-	state := initialState(&screen, surface)
+	state := NewStore(&screen, surface)
 	state.update(Message{command: LoadContainerList{}})
 
 	evChannel := make(chan tcell.Event, 10)
@@ -157,17 +93,17 @@ func main() {
 				msg := Message{command: ResizeCommand{}}
 				state.update(msg)
 			case *tcell.EventKey:
-				if ev.Key() == tcell.KeyEsc {
+				if ev.Key() == tcell.KeyEsc || ev.Rune() == 'q' {
 					msg := Message{command: ExitCommand{}}
 					state.update(msg)
 				}
 
-				if ev.Key() == tcell.KeyUp {
+				if ev.Key() == tcell.KeyUp || ev.Rune() == 'k' {
 					msg := Message{command: SelectPrevContainer{}}
 
 					state.update(msg)
 				}
-				if ev.Key() == tcell.KeyDown {
+				if ev.Key() == tcell.KeyDown || ev.Rune() == 'j' {
 					msg := Message{command: SelectNextContainer{}}
 
 					state.update(msg)
