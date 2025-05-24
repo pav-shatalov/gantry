@@ -1,4 +1,4 @@
-package span
+package widget
 
 import (
 	"gantry/geometry"
@@ -11,7 +11,7 @@ type Span struct {
 	padding int
 }
 
-func New(t string) Span {
+func NewSpan(t string) Span {
 	return Span{text: t, padding: 0}
 }
 

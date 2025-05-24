@@ -1,4 +1,4 @@
-package block
+package widget
 
 import (
 	"gantry/geometry"
@@ -46,7 +46,7 @@ type Block struct {
 	borderStyle tcell.Style
 }
 
-func New() Block {
+func NewBlock() Block {
 	return Block{
 		title:       "",
 		borders:     RoundBorders,
@@ -55,17 +55,17 @@ func New() Block {
 	}
 }
 
-func (b *Block) Title(title string) *Block {
+func (b Block) Title(title string) Block {
 	b.title = title
 	return b
 }
 
-func (b *Block) BorderStyle(style tcell.Style) *Block {
+func (b Block) BorderStyle(style tcell.Style) Block {
 	b.borderStyle = style
 	return b
 }
 
-func (b *Block) TitleStyle(style tcell.Style) *Block {
+func (b Block) TitleStyle(style tcell.Style) Block {
 	b.titleStyle = style
 	return b
 }

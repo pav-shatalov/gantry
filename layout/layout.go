@@ -35,11 +35,21 @@ func NewVertical(area geometry.Rect) Layout {
 	return New(area, Vertical)
 }
 
-func (l *Layout) Add(c Constraint) {
+func (l Layout) Add(c Constraint) Layout {
 	l.items = append(l.items, c)
+
+	return l
 }
 
-func (l *Layout) Areas() []geometry.Rect {
+func (l Layout) Constraints(constraints []Constraint) Layout {
+	for _, c := range constraints {
+		l = l.Add(c)
+	}
+
+	return l
+}
+
+func (l Layout) Areas() []geometry.Rect {
 	var areas []geometry.Rect
 	x := l.area.X
 	y := l.area.Y
@@ -61,8 +71,14 @@ func (l *Layout) Areas() []geometry.Rect {
 				cassowary.Medium,
 				cassowary.NewConstraint(cassowary.EQ, float64(-1*target), v.T(1)),
 			)
-			totalSizeTerms = append(totalSizeTerms, v.T(1))
+		case Min:
+			target := item.Value()
+			solver.AddConstraintWithPriority(
+				cassowary.Strong,
+				cassowary.NewConstraint(cassowary.GTE, float64(-1*target), v.T(1)),
+			)
 		}
+		totalSizeTerms = append(totalSizeTerms, v.T(1))
 		vars = append(vars, v)
 	}
 

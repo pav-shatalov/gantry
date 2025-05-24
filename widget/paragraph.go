@@ -1,4 +1,4 @@
-package paragraph
+package widget
 
 import (
 	"gantry/geometry"
@@ -38,6 +38,6 @@ func (p *Paragraph) Render(screen tcell.Screen, area geometry.Rect) {
 	}
 }
 
-func New(text string) Paragraph {
+func NewParagraph(text string) Paragraph {
 	return Paragraph{text: text}
 }
