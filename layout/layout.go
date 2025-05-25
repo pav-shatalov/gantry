@@ -1,7 +1,6 @@
 package layout
 
 import (
-	"gantry/ansicodes"
 	"gantry/cassowary"
 	"gantry/geometry"
 	"math"
@@ -77,6 +76,11 @@ func (l Layout) Areas() []geometry.Rect {
 				cassowary.Strong,
 				cassowary.NewConstraint(cassowary.GTE, float64(-1*target), v.T(1)),
 			)
+		case Length:
+			target := item.Value()
+			solver.AddConstraint(
+				cassowary.NewConstraint(cassowary.EQ, float64(-1*target), v.T(1)),
+			)
 		}
 		totalSizeTerms = append(totalSizeTerms, v.T(1))
 		vars = append(vars, v)
@@ -105,7 +109,6 @@ func (l Layout) Areas() []geometry.Rect {
 			Height: height,
 		}
 
-		ansicodes.CursorMoveAt(10, 10)
 		areas = append(areas, newArea)
 		if l.direction == Vertical {
 			y += height

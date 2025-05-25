@@ -22,20 +22,15 @@ func view(s ApplicationState, screen tcell.Screen) {
 		layout.NewPercentage(100),
 		layout.NewMin(2),
 	}
-	areas := layout.NewVertical(surface).Constraints(constraints).Areas()
-
-	containerListText := ""
-	for _, ctr := range s.containers {
-		containerListText += fmt.Sprintf("Name: %s; Image: %s\n", ctr.Name, ctr.Image)
-	}
+	verticalAreas := layout.NewVertical(surface).Constraints(constraints).Areas()
 
 	topArea := widget.NewParagraph("Top")
-	midArea := widget.NewParagraph(containerListText)
+	midArea := widget.NewTable(s.ContainerTableData())
 	bottomArea := widget.NewParagraph(fmt.Sprintf("Last KeyPress: %s; Debug: %s", s.lastKey, s.debug))
 
-	topArea.Render(screen, areas[0])
-	midArea.Render(screen, areas[1])
-	bottomArea.Render(screen, areas[2])
+	topArea.Render(screen, verticalAreas[0])
+	midArea.Render(screen, verticalAreas[1])
+	bottomArea.Render(screen, verticalAreas[2])
 }
 
 func main() {
@@ -70,7 +65,7 @@ func main() {
 	terminal.RestoreTerm()
 	duration := time.Since(state.startTime)
 	fps := int(float64(frames) / duration.Seconds())
-	fmt.Printf("FPS: %d", fps)
+	fmt.Printf("FPS: %d\n", fps)
 }
 
 func handleEvent(terminal tui.Terminal) Msg {

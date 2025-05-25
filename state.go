@@ -49,3 +49,22 @@ func (s ApplicationState) Update(msg Msg) ApplicationState {
 
 	return s
 }
+
+func (s ApplicationState) ContainerNames() []string {
+	var names []string
+	for _, ctr := range s.containers {
+		names = append(names, ctr.Name)
+	}
+
+	return names
+}
+
+func (s ApplicationState) ContainerTableData() [][]string {
+	var rows [][]string
+	for _, ctr := range s.containers {
+		row := []string{ctr.Name, ctr.Image, ctr.Id}
+		rows = append(rows, row)
+	}
+
+	return rows
+}

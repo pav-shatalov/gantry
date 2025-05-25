@@ -15,6 +15,10 @@ type Container struct {
 	Image string
 }
 
+func (c Container) String() string {
+	return c.Name
+}
+
 type Client struct {
 	dockerClient *dockerSdkClient.Client
 }
@@ -31,7 +35,6 @@ func NewClient() (Client, error) {
 	}
 
 	return client, nil
-
 }
 
 func (c Client) LoadContainerList() ([]Container, error) {
