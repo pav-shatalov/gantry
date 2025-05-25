@@ -10,3 +10,4 @@ type KeyPressMsg struct {
 type SelectNextContainerMsg struct{}
 type SelectPrevContainerMsg struct{}
 type LoadContainerListMsg struct{}
+type EnterContainerMsg struct{}

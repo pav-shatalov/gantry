@@ -7,12 +7,14 @@ import (
 )
 
 type ApplicationState struct {
-	debug      string
-	isRunning  bool
-	startTime  time.Time
-	lastKey    string
-	client     docker.Client
-	containers []docker.Container
+	debug                string
+	isRunning            bool
+	startTime            time.Time
+	lastKey              string
+	client               docker.Client
+	containers           []docker.Container
+	selectedContainerIdx int
+	next                 string
 }
 
 func NewState() (ApplicationState, error) {
@@ -45,6 +47,18 @@ func (s ApplicationState) Update(msg Msg) ApplicationState {
 
 		s.containers = containers
 		s.debug = fmt.Sprint("Loaded containers")
+	case SelectNextContainerMsg:
+		if len(s.containers)-1 > s.selectedContainerIdx {
+			s.selectedContainerIdx++
+		}
+	case SelectPrevContainerMsg:
+		if s.selectedContainerIdx > 0 {
+			s.selectedContainerIdx--
+		}
+	case EnterContainerMsg:
+		s.isRunning = false
+		s.next = s.containers[s.selectedContainerIdx].Id
+		// ...
 	}
 
 	return s

@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
+	"os/exec"
 	"time"
 
 	"github.com/gdamore/tcell/v2"
@@ -25,7 +27,7 @@ func view(s ApplicationState, screen tcell.Screen) {
 	verticalAreas := layout.NewVertical(surface).Constraints(constraints).Areas()
 
 	topArea := widget.NewParagraph("Top")
-	midArea := widget.NewTable(s.ContainerTableData())
+	midArea := widget.NewList(s.ContainerNames(), s.selectedContainerIdx)
 	bottomArea := widget.NewParagraph(fmt.Sprintf("Last KeyPress: %s; Debug: %s", s.lastKey, s.debug))
 
 	topArea.Render(screen, verticalAreas[0])
@@ -66,6 +68,18 @@ func main() {
 	duration := time.Since(state.startTime)
 	fps := int(float64(frames) / duration.Seconds())
 	fmt.Printf("FPS: %d\n", fps)
+
+	if state.next != "" {
+		cmd := exec.Command("docker", "exec", "-ti", state.next, "bash")
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		cmd.Stdin = os.Stdin
+
+		if err := cmd.Run(); err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to run command: %v\n", err)
+			os.Exit(1)
+		}
+	}
 }
 
 func handleEvent(terminal tui.Terminal) Msg {
@@ -78,6 +92,12 @@ func handleEvent(terminal tui.Terminal) Msg {
 			// Quit application
 			if ev.Key() == tcell.KeyEsc || ev.Key() == tcell.KeyCtrlC || ev.Rune() == 'q' {
 				msg = ExitMsg{}
+			} else if ev.Key() == tcell.KeyUp || ev.Rune() == 'k' {
+				msg = SelectPrevContainerMsg{}
+			} else if ev.Key() == tcell.KeyDown || ev.Rune() == 'j' {
+				msg = SelectNextContainerMsg{}
+			} else if ev.Key() == tcell.KeyCR {
+				msg = EnterContainerMsg{}
 			} else {
 				// Pass keypress to application
 				msg = KeyPressMsg{KeyString: ev.Name()}

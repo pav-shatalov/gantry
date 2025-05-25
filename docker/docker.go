@@ -51,7 +51,7 @@ func (c Client) LoadContainerList() ([]Container, error) {
 	for _, ctr := range dockerContainers {
 		containers = append(containers, Container{
 			Id:    ctr.ID,
-			Name:  strings.Join(ctr.Names, "|"),
+			Name:  strings.Trim(strings.Join(ctr.Names, "|"), "/"),
 			Image: ctr.Image,
 		})
 	}
