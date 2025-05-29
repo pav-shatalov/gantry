@@ -1,12 +1,15 @@
 package docker
 
 import (
+	"bufio"
+	"bytes"
 	"context"
 	"errors"
 	"strings"
 
 	dockerSdkContainer "github.com/docker/docker/api/types/container"
 	dockerSdkClient "github.com/docker/docker/client"
+	"github.com/docker/docker/pkg/stdcopy"
 )
 
 type Container struct {
@@ -74,4 +77,41 @@ func (c Client) ServerVersion() (string, error) {
 	}
 
 	return v.Version, nil
+}
+
+func (c Client) ContainerLogs(ctrId string) ([]string, error) {
+	var logs []string
+	if c.dockerClient == nil {
+		return logs, errors.New("Docker client is missing")
+	}
+
+	reader, err := c.dockerClient.ContainerLogs(context.TODO(), ctrId, dockerSdkContainer.LogsOptions{
+		ShowStdout: true,
+		ShowStderr: true,
+		Timestamps: false,
+		Follow:     false,
+		Tail:       "100",
+	})
+	if err != nil {
+		return logs, err
+	}
+	defer reader.Close()
+
+	buf := new(bytes.Buffer)
+	_, stdCopyErr := stdcopy.StdCopy(buf, buf, reader)
+	if stdCopyErr != nil {
+		return logs, err
+	}
+
+	scanner := bufio.NewScanner(buf)
+
+	for scanner.Scan() {
+		logs = append(logs, scanner.Text())
+	}
+
+	if err := scanner.Err(); err != nil {
+		return logs, err
+	}
+
+	return logs, nil
 }

@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 
 	"github.com/gdamore/tcell/v2"
@@ -39,7 +40,8 @@ func view(s ApplicationState, screen tcell.Screen) {
 	midAreaSplit := layout.NewHorizontal(verticalAreas[1]).Constraints([]layout.Constraint{layout.NewPercentage(30), layout.NewPercentage(70)}).Areas()
 
 	containerList := widget.NewList(s.ContainerNames(), s.selectedContainerIdx)
-	containerInfo := widget.NewParagraph("Container info will be here")
+	// containerInfo := widget.NewParagraph("Container info will be here")
+	containerInfo := widget.NewParagraph(strings.Join(s.selectedContainerLogs, "\n"))
 
 	topArea.Render(screen, verticalAreas[0])
 	bottomArea.Render(screen, verticalAreas[2])

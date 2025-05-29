@@ -7,17 +7,17 @@ import (
 )
 
 type ApplicationState struct {
-	debug                string
-	isRunning            bool
-	startTime            time.Time
-	lastKey              string
-	client               docker.Client
-	containers           []docker.Container
-	selectedContainerIdx int
-	next                 string
-
-	dockerClientVersion string
-	dockerServerVersion string
+	debug                 string
+	isRunning             bool
+	startTime             time.Time
+	lastKey               string
+	client                docker.Client
+	containers            []docker.Container
+	selectedContainerIdx  int
+	selectedContainerLogs []string
+	next                  string
+	dockerClientVersion   string
+	dockerServerVersion   string
 }
 
 func NewState() (ApplicationState, error) {
@@ -46,7 +46,6 @@ func (s ApplicationState) Update(msg Msg) ApplicationState {
 	case KeyPressMsg:
 		s.lastKey = m.KeyString
 	case LoadContainerListMsg:
-		s.debug = fmt.Sprintf("Loading containers")
 		containers, err := s.client.LoadContainerList()
 		if err != nil {
 			s.debug = fmt.Sprintf("%s", err)
@@ -54,19 +53,23 @@ func (s ApplicationState) Update(msg Msg) ApplicationState {
 		}
 
 		s.containers = containers
-		s.debug = fmt.Sprint("Loaded containers")
 	case SelectNextContainerMsg:
 		if len(s.containers)-1 > s.selectedContainerIdx {
 			s.selectedContainerIdx++
+			logs, err := s.client.ContainerLogs(s.containers[s.selectedContainerIdx].Id)
+			s.debug = fmt.Sprint(err)
+			s.selectedContainerLogs = logs
 		}
 	case SelectPrevContainerMsg:
 		if s.selectedContainerIdx > 0 {
 			s.selectedContainerIdx--
+			logs, err := s.client.ContainerLogs(s.containers[s.selectedContainerIdx].Id)
+			s.debug = fmt.Sprint(err)
+			s.selectedContainerLogs = logs
 		}
 	case EnterContainerMsg:
 		s.isRunning = false
 		s.next = s.containers[s.selectedContainerIdx].Id
-		// ...
 	}
 
 	return s
