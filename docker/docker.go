@@ -58,3 +58,20 @@ func (c Client) LoadContainerList() ([]Container, error) {
 
 	return containers, nil
 }
+
+func (c Client) Version() string {
+	return c.dockerClient.ClientVersion()
+}
+
+func (c Client) ServerVersion() (string, error) {
+	if c.dockerClient == nil {
+		return "", errors.New("Docker client is missing")
+	}
+
+	v, err := c.dockerClient.ServerVersion(context.TODO())
+	if err != nil {
+		return "", err
+	}
+
+	return v.Version, nil
+}

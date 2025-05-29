@@ -22,17 +22,29 @@ func view(s ApplicationState, screen tcell.Screen) {
 	constraints := []layout.Constraint{
 		layout.NewMin(2),
 		layout.NewPercentage(100),
-		layout.NewMin(2),
+		layout.NewMin(1),
 	}
 	verticalAreas := layout.NewVertical(surface).Constraints(constraints).Areas()
 
 	topArea := widget.NewParagraph("Top")
-	midArea := widget.NewList(s.ContainerNames(), s.selectedContainerIdx)
-	bottomArea := widget.NewParagraph(fmt.Sprintf("Last KeyPress: %s; Debug: %s", s.lastKey, s.debug))
+	bottomArea := widget.NewParagraph(
+		fmt.Sprintf(
+			"Client v%s, Server v%s, Last KeyPress: %s; Debug: %s",
+			s.dockerClientVersion,
+			s.dockerServerVersion,
+			s.lastKey,
+			s.debug,
+		),
+	)
+	midAreaSplit := layout.NewHorizontal(verticalAreas[1]).Constraints([]layout.Constraint{layout.NewPercentage(30), layout.NewPercentage(70)}).Areas()
+
+	containerList := widget.NewList(s.ContainerNames(), s.selectedContainerIdx)
+	containerInfo := widget.NewParagraph("Container info will be here")
 
 	topArea.Render(screen, verticalAreas[0])
-	midArea.Render(screen, verticalAreas[1])
 	bottomArea.Render(screen, verticalAreas[2])
+	containerList.Render(screen, midAreaSplit[0])
+	containerInfo.Render(screen, midAreaSplit[1])
 }
 
 func main() {

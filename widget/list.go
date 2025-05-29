@@ -30,7 +30,7 @@ func (s *List) Render(screen tcell.Screen, area geometry.Rect) {
 		}
 		sp := NewSpan(item)
 		if !isSelected {
-			sp.Padding(1)
+			sp = sp.Padding(1)
 		}
 		sp.Render(screen, geometry.Position{X: col, Y: row})
 

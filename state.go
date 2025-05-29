@@ -15,6 +15,9 @@ type ApplicationState struct {
 	containers           []docker.Container
 	selectedContainerIdx int
 	next                 string
+
+	dockerClientVersion string
+	dockerServerVersion string
 }
 
 func NewState() (ApplicationState, error) {
@@ -27,6 +30,11 @@ func NewState() (ApplicationState, error) {
 	state.isRunning = true
 	state.startTime = time.Now()
 	state.client = client
+	state.dockerClientVersion = client.Version()
+	serverVersion, err := client.ServerVersion()
+	if err == nil {
+		state.dockerServerVersion = serverVersion
+	}
 
 	return state, nil
 }
