@@ -105,13 +105,11 @@ func handleEvent(msgBus *MessageBus, terminal tui.Terminal) {
 		}
 	default:
 	}
-
 }
 
 func handleMsg(msgBus *MessageBus, state *ApplicationState) {
 	select {
 	case msg := <-msgBus.ch:
-		state.debug = fmt.Sprintf("New msg: %+v", msg)
 		state.Update(msg, msgBus)
 	default:
 	}

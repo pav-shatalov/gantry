@@ -22,11 +22,16 @@ type MessageBus struct {
 }
 
 func (b *MessageBus) send(msg Msg) {
-	b.ch <- msg
+	select {
+	case b.ch <- msg:
+		// ok
+	default:
+		// dropped
+	}
 }
 
 func NewMessageBus() MessageBus {
-	msgChannel := make(chan Msg, 64)
+	msgChannel := make(chan Msg, 16)
 
 	return MessageBus{ch: msgChannel}
 }
