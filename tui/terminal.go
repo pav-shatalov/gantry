@@ -21,6 +21,8 @@ func InitTerminal() (Terminal, error) {
 		return app, err
 	}
 
+	screen.EnableMouse()
+
 	app.EventChannel = make(chan tcell.Event)
 	app.quitChannel = make(chan struct{})
 

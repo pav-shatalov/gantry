@@ -40,7 +40,6 @@ func view(s ApplicationState, screen tcell.Screen) {
 	midAreaSplit := layout.NewHorizontal(verticalAreas[1]).Constraints([]layout.Constraint{layout.NewPercentage(30), layout.NewPercentage(70)}).Areas()
 
 	containerList := widget.NewList(s.ContainerNames(), s.selectedContainerIdx)
-	// containerInfo := widget.NewParagraph("Container info will be here")
 	containerInfo := widget.NewParagraph(strings.Join(s.selectedContainerLogs, "\n"))
 
 	topArea.Render(screen, verticalAreas[0])
@@ -51,10 +50,11 @@ func view(s ApplicationState, screen tcell.Screen) {
 
 func main() {
 	state, err := NewState()
+	messageBus := NewMessageBus()
 	if err != nil {
 		log.Fatal(err)
 	}
-	state = state.Update(LoadContainerListMsg{})
+	messageBus.send(LoadContainerListMsg{})
 	terminal, err := tui.InitTerminal()
 	if err != nil {
 		log.Fatal(err)
@@ -68,8 +68,8 @@ func main() {
 		})
 		frames++
 
-		msg := handleEvent(terminal)
-		state = state.Update(msg)
+		handleEvent(&messageBus, terminal)
+		handleMsg(&messageBus, &state)
 
 		if !state.isRunning {
 			break
@@ -96,29 +96,23 @@ func main() {
 	}
 }
 
-func handleEvent(terminal tui.Terminal) Msg {
-	var msg Msg
-
+func handleEvent(msgBus *MessageBus, terminal tui.Terminal) {
 	select {
 	case event := <-terminal.EventChannel:
 		switch ev := event.(type) {
 		case *tcell.EventKey:
-			// Quit application
-			if ev.Key() == tcell.KeyEsc || ev.Key() == tcell.KeyCtrlC || ev.Rune() == 'q' {
-				msg = ExitMsg{}
-			} else if ev.Key() == tcell.KeyUp || ev.Rune() == 'k' {
-				msg = SelectPrevContainerMsg{}
-			} else if ev.Key() == tcell.KeyDown || ev.Rune() == 'j' {
-				msg = SelectNextContainerMsg{}
-			} else if ev.Key() == tcell.KeyCR {
-				msg = EnterContainerMsg{}
-			} else {
-				// Pass keypress to application
-				msg = KeyPressMsg{KeyString: ev.Name()}
-			}
+			msgBus.send(KeyPressMsg{KeyString: ev.Name(), Key: ev.Key(), Rune: ev.Rune()})
 		}
 	default:
 	}
 
-	return msg
+}
+
+func handleMsg(msgBus *MessageBus, state *ApplicationState) {
+	select {
+	case msg := <-msgBus.ch:
+		state.debug = fmt.Sprintf("New msg: %+v", msg)
+		state.Update(msg, msgBus)
+	default:
+	}
 }

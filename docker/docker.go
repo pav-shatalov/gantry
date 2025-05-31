@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"strings"
+	"time"
 
 	dockerSdkContainer "github.com/docker/docker/api/types/container"
 	dockerSdkClient "github.com/docker/docker/client"
@@ -46,7 +47,9 @@ func (c Client) LoadContainerList() ([]Container, error) {
 	if c.dockerClient == nil {
 		return containers, errors.New("Docker client is missing")
 	}
-	dockerContainers, err := c.dockerClient.ContainerList(context.TODO(), dockerSdkContainer.ListOptions{})
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(1*time.Second))
+	defer cancel()
+	dockerContainers, err := c.dockerClient.ContainerList(ctx, dockerSdkContainer.ListOptions{})
 	if err != nil {
 		return containers, err
 	}
@@ -90,7 +93,7 @@ func (c Client) ContainerLogs(ctrId string) ([]string, error) {
 		ShowStderr: true,
 		Timestamps: false,
 		Follow:     false,
-		Tail:       "100",
+		Tail:       "50",
 	})
 	if err != nil {
 		return logs, err
