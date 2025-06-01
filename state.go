@@ -20,10 +20,11 @@ type ApplicationState struct {
 	next                  string
 	dockerClientVersion   string
 	dockerServerVersion   string
+	isDirty               bool
 }
 
 func NewState() (ApplicationState, error) {
-	state := ApplicationState{}
+	state := ApplicationState{isDirty: true}
 	client, err := docker.NewClient()
 	if err != nil {
 		return state, err

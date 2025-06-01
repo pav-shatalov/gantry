@@ -37,15 +37,22 @@ func view(s ApplicationState, screen tcell.Screen) {
 			s.debug,
 		),
 	)
-	midAreaSplit := layout.NewHorizontal(verticalAreas[1]).Constraints([]layout.Constraint{layout.NewPercentage(30), layout.NewPercentage(70)}).Areas()
+	midAreaSplit := layout.NewHorizontal(verticalAreas[1]).Constraints([]layout.Constraint{
+		layout.NewPercentage(30),
+		layout.NewLength(1),
+		layout.NewPercentage(70),
+	}).Areas()
 
+	containerListBlock := widget.NewContainer(midAreaSplit[2], geometry.Position{X: 0, Y: 0}).WithPadding(0, 0, 0, 1)
 	containerList := widget.NewList(s.ContainerNames(), s.selectedContainerIdx)
 	containerInfo := widget.NewParagraph(strings.Join(s.selectedContainerLogs, "\n"))
+	divider := widget.NewVerticalDivider()
 
 	topArea.Render(screen, verticalAreas[0])
 	bottomArea.Render(screen, verticalAreas[2])
 	containerList.Render(screen, midAreaSplit[0])
-	containerInfo.Render(screen, midAreaSplit[1])
+	divider.Render(screen, midAreaSplit[1])
+	containerInfo.Render(screen, containerListBlock.InnerArea())
 }
 
 func main() {
@@ -64,7 +71,12 @@ func main() {
 
 	for {
 		terminal.Draw(func(screen tcell.Screen) {
-			view(state, screen)
+			if state.isDirty {
+				screen.Clear()
+				view(state, screen)
+				screen.Show()
+				state.isDirty = false
+			}
 		})
 		frames++
 
@@ -102,6 +114,8 @@ func handleEvent(msgBus *MessageBus, terminal tui.Terminal) {
 		switch ev := event.(type) {
 		case *tcell.EventKey:
 			msgBus.send(KeyPressMsg{KeyString: ev.Name(), Key: ev.Key(), Rune: ev.Rune()})
+		case *tcell.EventResize:
+			msgBus.send(ResizeMsg{})
 		}
 	default:
 	}
@@ -111,6 +125,7 @@ func handleMsg(msgBus *MessageBus, state *ApplicationState) {
 	select {
 	case msg := <-msgBus.ch:
 		state.Update(msg, msgBus)
+		state.isDirty = true
 	default:
 	}
 }

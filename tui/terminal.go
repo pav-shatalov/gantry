@@ -33,9 +33,9 @@ func InitTerminal() (Terminal, error) {
 }
 
 func (a *Terminal) Draw(t func(screen tcell.Screen)) {
-	a.Screen.Clear() // todo: remove it?
+	// a.Screen.Clear() // todo: remove it?
 	t(a.Screen)
-	a.Screen.Show()
+	// a.Screen.Show()
 }
 
 func (a *Terminal) RestoreTerm() {
