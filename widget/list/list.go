@@ -1,0 +1,41 @@
+package list
+
+import (
+	"gantry/geometry"
+	"gantry/tui"
+	"gantry/widget/span"
+
+	runewidth "github.com/mattn/go-runewidth"
+)
+
+type List struct {
+	options  []string
+	selected any
+}
+
+func New(options []string, selectedIdx int) List {
+	return List{options: options, selected: selectedIdx}
+}
+
+func (s *List) Render(buf *tui.ScreenBuffer, area geometry.Rect) {
+	col := area.X
+	row := area.Y
+
+	for itemIdx, item := range s.options {
+		isSelected := itemIdx == s.selected
+		if isSelected {
+			marker := '›'
+			markerSpan := span.New(string(marker))
+			markerSpan.Render(buf, geometry.Position{X: col, Y: row})
+			col += runewidth.RuneWidth(marker)
+		}
+		sp := span.New(item)
+		if !isSelected {
+			sp = sp.Padding(1)
+		}
+		sp.Render(buf, geometry.Position{X: col, Y: row})
+
+		col = area.X
+		row++
+	}
+}

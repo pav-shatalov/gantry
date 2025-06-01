@@ -5,55 +5,12 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"strings"
 	"time"
 
 	"github.com/gdamore/tcell/v2"
 
-	"gantry/geometry"
-	"gantry/layout"
 	"gantry/tui"
-	"gantry/widget"
 )
-
-func view(s ApplicationState, screen tcell.Screen) {
-	width, height := screen.Size()
-	surface := geometry.Rect{X: 0, Y: 0, Width: width, Height: height}
-
-	constraints := []layout.Constraint{
-		layout.NewMin(2),
-		layout.NewPercentage(100),
-		layout.NewMin(1),
-	}
-	verticalAreas := layout.NewVertical(surface).Constraints(constraints).Areas()
-
-	topArea := widget.NewParagraph("Top")
-	bottomArea := widget.NewParagraph(
-		fmt.Sprintf(
-			"Client v%s, Server v%s, Last KeyPress: %s; Debug: %s",
-			s.dockerClientVersion,
-			s.dockerServerVersion,
-			s.lastKey,
-			s.debug,
-		),
-	)
-	midAreaSplit := layout.NewHorizontal(verticalAreas[1]).Constraints([]layout.Constraint{
-		layout.NewPercentage(30),
-		layout.NewLength(1),
-		layout.NewPercentage(70),
-	}).Areas()
-
-	containerListBlock := widget.NewContainer(midAreaSplit[2], geometry.Position{X: 0, Y: 0}).WithPadding(0, 0, 0, 1)
-	containerList := widget.NewList(s.ContainerNames(), s.selectedContainerIdx)
-	containerInfo := widget.NewParagraph(strings.Join(s.selectedContainerLogs, "\n"))
-	divider := widget.NewVerticalDivider()
-
-	topArea.Render(screen, verticalAreas[0])
-	bottomArea.Render(screen, verticalAreas[2])
-	containerList.Render(screen, midAreaSplit[0])
-	divider.Render(screen, midAreaSplit[1])
-	containerInfo.Render(screen, containerListBlock.InnerArea())
-}
 
 func main() {
 	state, err := NewState()
@@ -68,16 +25,10 @@ func main() {
 	}
 
 	var frames int
+	appWidget := AppWidget{state: &state}
 
 	for {
-		terminal.Draw(func(screen tcell.Screen) {
-			if state.isDirty {
-				screen.Clear()
-				view(state, screen)
-				screen.Show()
-				state.isDirty = false
-			}
-		})
+		terminal.Draw(appWidget)
 		frames++
 
 		handleEvent(&messageBus, terminal)

@@ -1,6 +1,8 @@
 package tui
 
 import (
+	"gantry/geometry"
+
 	"github.com/gdamore/tcell/v2"
 )
 
@@ -22,6 +24,7 @@ func InitTerminal() (Terminal, error) {
 	}
 
 	screen.EnableMouse()
+	screen.Clear()
 
 	app.EventChannel = make(chan tcell.Event, 16)
 	app.quitChannel = make(chan struct{})
@@ -32,13 +35,25 @@ func InitTerminal() (Terminal, error) {
 	return app, nil
 }
 
-func (a *Terminal) Draw(t func(screen tcell.Screen)) {
-	// a.Screen.Clear() // todo: remove it?
-	t(a.Screen)
-	// a.Screen.Show()
+func (a *Terminal) Draw(widget Widget) {
+	w, h := a.Screen.Size()
+	buf := NewBuffer(w, h)
+	area := geometry.Rect{X: 0, Y: 0, Width: w, Height: h}
+	widget.Render(&buf, area)
+	flushBuf(a.Screen, &buf)
 }
 
 func (a *Terminal) RestoreTerm() {
 	close(a.quitChannel)
 	a.Screen.Fini()
+}
+
+func flushBuf(s tcell.Screen, buf *ScreenBuffer) {
+	for y := range buf.Height() {
+		for x := range buf.Width() {
+			s.SetContent(x, y, buf.GetCell(x, y).r, []rune{}, tcell.StyleDefault)
+		}
+	}
+
+	s.Show()
 }
