@@ -28,7 +28,10 @@ func main() {
 	appWidget := AppWidget{state: &state}
 
 	for {
-		terminal.Draw(appWidget)
+		if state.isDirty {
+			terminal.Draw(appWidget)
+			state.isDirty = false
+		}
 		frames++
 
 		handleEvent(&messageBus, terminal)

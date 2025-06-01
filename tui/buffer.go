@@ -4,8 +4,7 @@ type ScreenBuffer struct {
 	height int
 	width  int
 
-	rows    [][]BufferCell
-	isDirty bool
+	rows [][]BufferCell
 }
 
 type BufferCell struct {
@@ -15,11 +14,9 @@ type BufferCell struct {
 
 func (b *ScreenBuffer) SetContent(x int, y int, r rune, style Style) {
 	b.rows[y][x] = BufferCell{r: r, style: style}
-	b.isDirty = true
 }
 
 func (b *ScreenBuffer) GetContent() [][]BufferCell {
-	b.isDirty = false
 	return b.rows
 }
 
@@ -36,7 +33,7 @@ func NewBuffer(w int, h int) ScreenBuffer {
 		}
 	}
 
-	return ScreenBuffer{height: h, width: w, rows: rows, isDirty: true}
+	return ScreenBuffer{height: h, width: w, rows: rows}
 }
 
 func (b *ScreenBuffer) Width() int {
