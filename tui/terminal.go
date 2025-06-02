@@ -58,12 +58,12 @@ func (a *Terminal) RestoreTerm() {
 	a.Screen.Fini()
 }
 
-func (a *Terminal) flushBuf(s tcell.Screen, buf *ScreenBuffer) {
+func (a *Terminal) flushBuf(s tcell.Screen, buf *OutputBuffer) {
 	for y := range buf.Height() {
 		for x := range buf.Width() {
 			cell := buf.GetCell(x, y)
-			style := a.convertStyle(&cell.style)
-			s.SetContent(x, y, cell.r, []rune{}, style)
+			style := a.convertStyle(&cell.Style)
+			s.SetContent(x, y, cell.R, []rune{}, style)
 		}
 	}
 

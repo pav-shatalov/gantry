@@ -3,8 +3,6 @@ package paragraph
 import (
 	"gantry/geometry"
 	"gantry/tui"
-	"regexp"
-	"strings"
 )
 
 type Paragraph struct {
@@ -12,29 +10,41 @@ type Paragraph struct {
 	scroll geometry.Position
 }
 
-func (p *Paragraph) Render(buf *tui.ScreenBuffer, area geometry.Rect) {
+func (p *Paragraph) Render(buf *tui.OutputBuffer, area geometry.Rect) {
 	if len(p.text) == 0 {
 		return
 	}
 
-	lines := strings.Split(p.text, "\n")
-	ansiRegexp := regexp.MustCompile(`\x1b\[[0-9;]*[a-zA-Z]`)
+	tmpBuffer := tui.NewAutogrowingBuffer(area.Width, 1)
 
-	for y := range area.Height {
-		if y > len(lines)-1 {
-			break
+	col := 0
+	row := 0
+	remainingCols := area.Width
+
+	for _, r := range p.text {
+		if r == '\n' {
+			row++
+			col = 0
+			remainingCols = area.Width
+			continue
 		}
-		cleanLine := ansiRegexp.ReplaceAllString(lines[y], "")
-		runes := []rune(cleanLine)
-		for x := range area.Width {
-			runeIdx := x
-			if runeIdx >= len(runes) {
-				continue
-			}
-			r := runes[runeIdx]
-			buf.SetContent(area.X+x, area.Y+y, r, tui.StyleDefault)
+		if remainingCols == 0 {
+			continue
 		}
+		tmpBuffer.SetContent(col, row, r, tui.StyleDefault)
+		col++
+		remainingCols--
 	}
+
+	buf.FillFrom(&tmpBuffer, area)
+
+	// m := fmt.Sprintf("Size: %dx%d", tmpBuffer.Width(), tmpBuffer.Height())
+	// col := area.X
+	// row := area.Y
+	// for _, r := range m {
+	// 	buf.SetContent(col, row, r, tui.StyleDefault)
+	// 	col++
+	// }
 
 	// for _, c := range p.text {
 	// 	// Move to the next line

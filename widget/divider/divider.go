@@ -25,7 +25,7 @@ func NewHorizontal() Divider {
 	return Divider{direction: horizontal, r: '─'}
 }
 
-func (s *Divider) Render(buf *tui.ScreenBuffer, area geometry.Rect) {
+func (s *Divider) Render(buf *tui.OutputBuffer, area geometry.Rect) {
 	dim := area.Width
 	row := area.Y
 	col := area.X

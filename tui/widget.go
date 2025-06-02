@@ -5,7 +5,7 @@ import (
 )
 
 type Widget interface {
-	Render(buf *ScreenBuffer, area geometry.Rect)
+	Render(buf *OutputBuffer, area geometry.Rect)
 }
 
 type BlockWidget struct{}

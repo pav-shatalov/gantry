@@ -16,7 +16,7 @@ type AppWidget struct {
 	state *ApplicationState
 }
 
-func (a AppWidget) Render(buf *tui.ScreenBuffer, area geometry.Rect) {
+func (a AppWidget) Render(buf *tui.OutputBuffer, area geometry.Rect) {
 	constraints := []layout.Constraint{
 		layout.NewMin(2),
 		layout.NewPercentage(100),

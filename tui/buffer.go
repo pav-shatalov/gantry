@@ -1,45 +1,108 @@
 package tui
 
-type ScreenBuffer struct {
-	height int
-	width  int
+import (
+	"gantry/geometry"
+)
+
+type OutputBuffer struct {
+	height   int
+	width    int
+	autogrow bool
 
 	rows [][]BufferCell
 }
 
 type BufferCell struct {
-	r     rune
-	style Style
+	R     rune
+	Style Style
 }
 
-func (b *ScreenBuffer) SetContent(x int, y int, r rune, style Style) {
-	b.rows[y][x] = BufferCell{r: r, style: style}
+func (b *OutputBuffer) SetContent(x int, y int, r rune, style Style) {
+	if b.autogrow && y >= b.height {
+		rowsToCreate := 64
+		newRows := createRows(b.width, rowsToCreate)
+		for range newRows {
+			b.rows = append(b.rows, createRow(b.width))
+		}
+	}
+	b.rows[y][x] = BufferCell{R: r, Style: style}
 }
 
-func (b *ScreenBuffer) GetContent() [][]BufferCell {
+func (b *OutputBuffer) SetCell(x int, y int, cell *BufferCell) {
+	b.rows[y][x] = *cell
+}
+
+func (b *OutputBuffer) GetContent() [][]BufferCell {
 	return b.rows
 }
 
-func (b *ScreenBuffer) GetCell(x int, y int) *BufferCell {
+func (b *OutputBuffer) GetCell(x int, y int) *BufferCell {
 	return &b.rows[y][x]
 }
 
-func NewBuffer(w int, h int) ScreenBuffer {
-	rows := make([][]BufferCell, h)
+func (b *OutputBuffer) FillFrom(tmpBuf *OutputBuffer, area geometry.Rect) {
+	h := tmpBuf.Height()
+	w := tmpBuf.Width()
+	remainingRows := area.Height
+	offset := 0
+	if tmpBuf.Height() > 10 {
+		offset = 20
+	}
+	rowsProcessed := 0
 	for y := range h {
-		rows[y] = make([]BufferCell, w)
+		remainingRows--
+
+		remainingCols := area.Width
 		for x := range w {
-			rows[y][x] = BufferCell{r: ' ', style: StyleDefault}
+			remainingCols--
+
+			cell := tmpBuf.GetCell(x, y+offset)
+			b.SetCell(x+area.X, y+area.Y, cell)
+			if remainingCols == 0 {
+				break
+			}
+		}
+		rowsProcessed++
+
+		if remainingRows == 0 {
+			break
 		}
 	}
-
-	return ScreenBuffer{height: h, width: w, rows: rows}
 }
 
-func (b *ScreenBuffer) Width() int {
+func NewBuffer(w int, h int) OutputBuffer {
+	rows := createRows(w, h)
+	return OutputBuffer{height: h, width: w, rows: rows, autogrow: false}
+}
+
+func createRows(w int, h int) [][]BufferCell {
+	rows := make([][]BufferCell, h)
+	for y := range h {
+		rows[y] = createRow(w)
+	}
+
+	return rows
+}
+
+func createRow(w int) []BufferCell {
+	row := make([]BufferCell, w)
+	for x := range w {
+		row[x] = BufferCell{R: ' ', Style: StyleDefault}
+	}
+
+	return row
+}
+
+func NewAutogrowingBuffer(w int, initialHeight int) OutputBuffer {
+	buf := NewBuffer(w, initialHeight)
+	buf.autogrow = true
+	return buf
+}
+
+func (b *OutputBuffer) Width() int {
 	return b.width
 }
 
-func (b *ScreenBuffer) Height() int {
-	return b.height
+func (b *OutputBuffer) Height() int {
+	return len(b.rows)
 }

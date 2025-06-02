@@ -36,6 +36,6 @@ func (c *Container) InnerArea() geometry.Rect {
 	}
 }
 
-func (c *Container) Render(buf tui.ScreenBuffer, area geometry.Rect) {
+func (c *Container) Render(buf tui.OutputBuffer, area geometry.Rect) {
 
 }

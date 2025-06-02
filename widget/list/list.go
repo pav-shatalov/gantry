@@ -17,7 +17,7 @@ func New(options []string, selectedIdx int) List {
 	return List{options: options, selected: selectedIdx}
 }
 
-func (s *List) Render(buf *tui.ScreenBuffer, area geometry.Rect) {
+func (s *List) Render(buf *tui.OutputBuffer, area geometry.Rect) {
 	col := area.X
 	row := area.Y
 

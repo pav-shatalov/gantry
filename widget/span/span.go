@@ -24,7 +24,7 @@ func (s Span) Padding(padding int) Span {
 	return s
 }
 
-func (s *Span) Render(buf *tui.ScreenBuffer, pos geometry.Position) {
+func (s *Span) Render(buf *tui.OutputBuffer, pos geometry.Position) {
 	row := pos.Y
 	col := pos.X
 	text := ""
