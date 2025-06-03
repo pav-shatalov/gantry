@@ -22,6 +22,7 @@ type ApplicationState struct {
 	dockerServerVersion   string
 	isDirty               bool
 	counter               int
+	scrollOffset          int
 }
 
 func NewState() (ApplicationState, error) {
@@ -54,6 +55,10 @@ func (s *ApplicationState) Update(msg Msg, msgBus *MessageBus) {
 			msgBus.send(SelectNextContainerMsg{})
 		} else if m.Key == tcell.KeyCR {
 			msgBus.send(EnterContainerMsg{})
+		} else if m.Key == tcell.KeyCtrlD {
+			msgBus.send(ScrollDownMsg{})
+		} else if m.Key == tcell.KeyCtrlU {
+			msgBus.send(ScrollUpMsg{})
 		}
 	case ExitMsg:
 		s.isRunning = false
@@ -90,6 +95,17 @@ func (s *ApplicationState) Update(msg Msg, msgBus *MessageBus) {
 	case EnterContainerMsg:
 		s.isRunning = false
 		s.next = s.containers[s.selectedContainerIdx].Id
+	case ResizeMsg:
+		s.isDirty = true
+	case ScrollDownMsg:
+		s.scrollOffset += 5
+		s.isDirty = true
+	case ScrollUpMsg:
+		s.scrollOffset -= 5
+		if s.scrollOffset < 0 {
+			s.scrollOffset = 0
+		}
+		s.isDirty = true
 	}
 }
 

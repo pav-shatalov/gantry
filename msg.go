@@ -16,6 +16,8 @@ type SelectPrevContainerMsg struct{}
 type LoadContainerListMsg struct{}
 type LoadContainerLogsMsg struct{}
 type EnterContainerMsg struct{}
+type ScrollUpMsg struct{}
+type ScrollDownMsg struct{}
 
 type MessageBus struct {
 	ch chan Msg

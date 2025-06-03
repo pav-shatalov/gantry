@@ -12,7 +12,7 @@ import (
 	"gantry/tui"
 )
 
-func main() { // Start the pprof server in a separate goroutine
+func main() {
 	state, err := NewState()
 	messageBus := NewMessageBus()
 	if err != nil {
@@ -29,6 +29,13 @@ func main() { // Start the pprof server in a separate goroutine
 	appWidget := AppWidget{state: &state}
 
 	for {
+		defer func() {
+			if r := recover(); r != nil {
+				state.isRunning = false
+				terminal.RestoreTerm()
+				log.Fatal(r)
+			}
+		}()
 		if state.isDirty {
 			terminal.Draw(appWidget)
 			state.isDirty = false

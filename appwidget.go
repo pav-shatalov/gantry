@@ -44,7 +44,7 @@ func (a AppWidget) Render(buf *tui.OutputBuffer, area geometry.Rect) {
 
 	containerListBlock := container.New(midAreaSplit[2], geometry.Position{X: 0, Y: 0}).WithPadding(0, 0, 0, 1)
 	containerList := list.New(a.state.ContainerNames(), a.state.selectedContainerIdx)
-	containerInfo := paragraph.New(strings.Join(a.state.selectedContainerLogs, "\n"))
+	containerInfo := paragraph.New(strings.Join(a.state.selectedContainerLogs, "\n")).Scroll(a.state.scrollOffset)
 	divider := divider.NewVertical()
 
 	topArea.Render(buf, verticalAreas[0])

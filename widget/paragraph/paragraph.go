@@ -3,11 +3,46 @@ package paragraph
 import (
 	"gantry/geometry"
 	"gantry/tui"
+
+	"github.com/mattn/go-runewidth"
 )
 
 type Paragraph struct {
 	text   string
-	scroll geometry.Position
+	scroll int
+}
+
+func reflow(s string, maxLength int) []string {
+	var (
+		lines []string
+		line  []rune
+		width int
+	)
+
+	for _, r := range s {
+		if r == '\n' {
+			lines = append(lines, string(line))
+			line = nil
+			width = 0
+			continue
+		}
+
+		w := runewidth.RuneWidth(r)
+		if width+w > maxLength {
+			lines = append(lines, string(line))
+			line = []rune{r}
+			width = w
+		} else {
+			line = append(line, r)
+			width += w
+		}
+	}
+
+	if len(line) > 0 {
+		lines = append(lines, string(line))
+	}
+
+	return lines
 }
 
 func (p *Paragraph) Render(buf *tui.OutputBuffer, area geometry.Rect) {
@@ -15,61 +50,28 @@ func (p *Paragraph) Render(buf *tui.OutputBuffer, area geometry.Rect) {
 		return
 	}
 
-	tmpBuffer := tui.NewAutogrowingBuffer(area.Width, 1)
+	t := reflow(p.text, area.Width-1)
 
-	col := 0
-	row := 0
-	remainingCols := area.Width
+	remainingRows := area.Height
+	idx := 0
 
-	for _, r := range p.text {
-		if r == '\n' {
-			row++
-			col = 0
-			remainingCols = area.Width
-			continue
+	for y := p.scroll; y < len(t); y++ {
+		if remainingRows == 0 {
+			break
 		}
-		if remainingCols == 0 {
-			continue
+		for x, r := range t[y] {
+			buf.SetContent(x+area.X, area.Y+idx, r, tui.StyleDefault)
 		}
-		tmpBuffer.SetContent(col, row, r, tui.StyleDefault)
-		col++
-		remainingCols--
+		remainingRows--
+		idx++
 	}
-
-	buf.FillFrom(&tmpBuffer, area)
-
-	// m := fmt.Sprintf("Size: %dx%d", tmpBuffer.Width(), tmpBuffer.Height())
-	// col := area.X
-	// row := area.Y
-	// for _, r := range m {
-	// 	buf.SetContent(col, row, r, tui.StyleDefault)
-	// 	col++
-	// }
-
-	// for _, c := range p.text {
-	// 	// Move to the next line
-	// 	if c == '\n' {
-	// 		row++
-	// 		col = area.X
-	// 		continue
-	// 	}
-	//
-	// 	// For now just hard wrap
-	// 	if col > w {
-	// 		row++
-	// 		col = area.X
-	// 	}
-	//
-	// 	// Ignore output if no more space left
-	// 	if row > h {
-	// 		break
-	// 	}
-	//
-	// 	screen.SetContent(col, row, c, []rune{}, tcell.StyleDefault)
-	// 	col++
-	// }
 }
 
 func New(text string) Paragraph {
-	return Paragraph{text: text, scroll: geometry.Position{X: 0, Y: 0}}
+	return Paragraph{text: text, scroll: 0}
+}
+
+func (p Paragraph) Scroll(s int) Paragraph {
+	p.scroll = s
+	return p
 }
