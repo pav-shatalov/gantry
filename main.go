@@ -12,7 +12,7 @@ import (
 	"gantry/tui"
 )
 
-func main() {
+func main() { // Start the pprof server in a separate goroutine
 	state, err := NewState()
 	messageBus := NewMessageBus()
 	if err != nil {
@@ -25,16 +25,18 @@ func main() {
 	}
 
 	var frames int
+	var renderCalls int
 	appWidget := AppWidget{state: &state}
 
 	for {
 		if state.isDirty {
 			terminal.Draw(appWidget)
 			state.isDirty = false
+			renderCalls++
 		}
 		frames++
 
-		handleEvent(&messageBus, terminal)
+		handleEvent(&messageBus, &terminal)
 		handleMsg(&messageBus, &state)
 
 		if !state.isRunning {
@@ -48,6 +50,7 @@ func main() {
 	duration := time.Since(state.startTime)
 	fps := int(float64(frames) / duration.Seconds())
 	fmt.Printf("FPS: %d\n", fps)
+	fmt.Printf("Render calls: %d\n", renderCalls)
 
 	if state.next != "" {
 		cmd := exec.Command("docker", "exec", "-ti", state.next, "bash")
@@ -62,7 +65,7 @@ func main() {
 	}
 }
 
-func handleEvent(msgBus *MessageBus, terminal tui.Terminal) {
+func handleEvent(msgBus *MessageBus, terminal *tui.Terminal) {
 	select {
 	case event := <-terminal.EventChannel:
 		switch ev := event.(type) {
@@ -78,8 +81,8 @@ func handleEvent(msgBus *MessageBus, terminal tui.Terminal) {
 func handleMsg(msgBus *MessageBus, state *ApplicationState) {
 	select {
 	case msg := <-msgBus.ch:
+		state.debug = fmt.Sprintf("New Msg %#v", msg)
 		state.Update(msg, msgBus)
-		state.isDirty = true
 	default:
 	}
 }

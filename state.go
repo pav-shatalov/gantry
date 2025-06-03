@@ -21,6 +21,7 @@ type ApplicationState struct {
 	dockerClientVersion   string
 	dockerServerVersion   string
 	isDirty               bool
+	counter               int
 }
 
 func NewState() (ApplicationState, error) {
@@ -66,17 +67,22 @@ func (s *ApplicationState) Update(msg Msg, msgBus *MessageBus) {
 		s.containers = containers
 		msgBus.send(LoadContainerLogsMsg{})
 	case LoadContainerLogsMsg:
+		s.isDirty = true
 		logs, err := s.client.ContainerLogs(s.containers[s.selectedContainerIdx].Id)
 		if err != nil {
 			s.debug = fmt.Sprint(err)
 		}
 		s.selectedContainerLogs = logs
+		s.debug = fmt.Sprintf("Loaded container logs. %d", s.counter)
+		s.counter++
 	case SelectNextContainerMsg:
+		s.isDirty = true
 		if len(s.containers)-1 > s.selectedContainerIdx {
 			s.selectedContainerIdx++
 			msgBus.send(LoadContainerLogsMsg{})
 		}
 	case SelectPrevContainerMsg:
+		s.isDirty = true
 		if s.selectedContainerIdx > 0 {
 			s.selectedContainerIdx--
 			msgBus.send(LoadContainerLogsMsg{})

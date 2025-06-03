@@ -88,7 +88,10 @@ func (c Client) ContainerLogs(ctrId string) ([]string, error) {
 		return logs, errors.New("Docker client is missing")
 	}
 
-	reader, err := c.dockerClient.ContainerLogs(context.TODO(), ctrId, dockerSdkContainer.LogsOptions{
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	defer cancel()
+
+	reader, err := c.dockerClient.ContainerLogs(ctx, ctrId, dockerSdkContainer.LogsOptions{
 		ShowStdout: true,
 		ShowStderr: true,
 		Timestamps: false,

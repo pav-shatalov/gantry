@@ -18,7 +18,7 @@ type BufferCell struct {
 }
 
 func (b *OutputBuffer) SetContent(x int, y int, r rune, style Style) {
-	if b.autogrow && y >= b.height {
+	if b.autogrow && y >= b.Height() {
 		rowsToCreate := 64
 		newRows := createRows(b.width, rowsToCreate)
 		for range newRows {
@@ -76,7 +76,7 @@ func NewBuffer(w int, h int) OutputBuffer {
 }
 
 func createRows(w int, h int) [][]BufferCell {
-	rows := make([][]BufferCell, h)
+	rows := make([][]BufferCell, h, 256)
 	for y := range h {
 		rows[y] = createRow(w)
 	}
@@ -85,7 +85,7 @@ func createRows(w int, h int) [][]BufferCell {
 }
 
 func createRow(w int) []BufferCell {
-	row := make([]BufferCell, w)
+	row := make([]BufferCell, w, 256)
 	for x := range w {
 		row[x] = BufferCell{R: ' ', Style: StyleDefault}
 	}
