@@ -7,12 +7,18 @@ import (
 	"os/exec"
 	"time"
 
+	// "net/http"
+	// _ "net/http/pprof"
+
 	"github.com/gdamore/tcell/v2"
 
 	"gantry/tui"
 )
 
 func main() {
+	// go func() {
+	// 	http.ListenAndServe(":6060", nil)
+	// }()
 	state, err := NewState()
 	messageBus := NewMessageBus()
 	if err != nil {
@@ -36,6 +42,7 @@ func main() {
 				log.Fatal(r)
 			}
 		}()
+
 		if state.isDirty {
 			terminal.Draw(appWidget)
 			state.isDirty = false
@@ -89,7 +96,10 @@ func handleMsg(msgBus *MessageBus, state *ApplicationState) {
 	select {
 	case msg := <-msgBus.ch:
 		state.debug = fmt.Sprintf("New Msg %#v", msg)
-		state.Update(msg, msgBus)
+		cmd := state.Update(msg)
+		if cmd != nil {
+			go cmd(msgBus)
+		}
 	default:
 	}
 }

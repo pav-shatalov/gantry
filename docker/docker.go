@@ -96,7 +96,7 @@ func (c Client) ContainerLogs(ctrId string) ([]string, error) {
 		ShowStderr: true,
 		Timestamps: false,
 		Follow:     false,
-		Tail:       "50",
+		Tail:       "1000",
 	})
 	if err != nil {
 		return logs, err

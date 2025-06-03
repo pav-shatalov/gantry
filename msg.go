@@ -23,6 +23,14 @@ type MessageBus struct {
 	ch chan Msg
 }
 
+type Cmd func(*MessageBus)
+
+func NewCmd(msg Msg) Cmd {
+	return func(bus *MessageBus) {
+		bus.send(msg)
+	}
+}
+
 func (b *MessageBus) send(msg Msg) {
 	select {
 	case b.ch <- msg:
@@ -33,7 +41,7 @@ func (b *MessageBus) send(msg Msg) {
 }
 
 func NewMessageBus() MessageBus {
-	msgChannel := make(chan Msg, 16)
+	msgChannel := make(chan Msg, 4)
 
 	return MessageBus{ch: msgChannel}
 }

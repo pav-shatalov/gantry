@@ -36,7 +36,7 @@ func InitTerminal() (Terminal, error) {
 	screen.EnableMouse()
 	screen.Clear()
 
-	app.EventChannel = make(chan tcell.Event, 16)
+	app.EventChannel = make(chan tcell.Event, 8)
 	app.quitChannel = make(chan struct{})
 
 	go screen.ChannelEvents(app.EventChannel, app.quitChannel)

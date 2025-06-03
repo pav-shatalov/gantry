@@ -44,21 +44,24 @@ func NewState() (ApplicationState, error) {
 	return state, nil
 }
 
-func (s *ApplicationState) Update(msg Msg, msgBus *MessageBus) {
+func (s *ApplicationState) Update(msg Msg) Cmd {
+	var cmd Cmd
 	switch m := msg.(type) {
+
+	// TODO: move it somewhere
 	case KeyPressMsg:
 		if m.Key == tcell.KeyEsc || m.Key == tcell.KeyCtrlC || m.Rune == 'q' {
-			msgBus.send(ExitMsg{})
+			cmd = NewCmd(ExitMsg{})
 		} else if m.Key == tcell.KeyUp || m.Rune == 'k' {
-			msgBus.send(SelectPrevContainerMsg{})
+			cmd = NewCmd(SelectPrevContainerMsg{})
 		} else if m.Key == tcell.KeyDown || m.Rune == 'j' {
-			msgBus.send(SelectNextContainerMsg{})
+			cmd = NewCmd(SelectNextContainerMsg{})
 		} else if m.Key == tcell.KeyCR {
-			msgBus.send(EnterContainerMsg{})
+			cmd = NewCmd(EnterContainerMsg{})
 		} else if m.Key == tcell.KeyCtrlD {
-			msgBus.send(ScrollDownMsg{})
+			cmd = NewCmd(ScrollDownMsg{})
 		} else if m.Key == tcell.KeyCtrlU {
-			msgBus.send(ScrollUpMsg{})
+			cmd = NewCmd(ScrollUpMsg{})
 		}
 	case ExitMsg:
 		s.isRunning = false
@@ -70,9 +73,10 @@ func (s *ApplicationState) Update(msg Msg, msgBus *MessageBus) {
 		}
 
 		s.containers = containers
-		msgBus.send(LoadContainerLogsMsg{})
+		cmd = NewCmd(LoadContainerLogsMsg{})
 	case LoadContainerLogsMsg:
 		s.isDirty = true
+		s.scrollOffset = 0
 		logs, err := s.client.ContainerLogs(s.containers[s.selectedContainerIdx].Id)
 		if err != nil {
 			s.debug = fmt.Sprint(err)
@@ -84,13 +88,13 @@ func (s *ApplicationState) Update(msg Msg, msgBus *MessageBus) {
 		s.isDirty = true
 		if len(s.containers)-1 > s.selectedContainerIdx {
 			s.selectedContainerIdx++
-			msgBus.send(LoadContainerLogsMsg{})
+			cmd = NewCmd(LoadContainerLogsMsg{})
 		}
 	case SelectPrevContainerMsg:
 		s.isDirty = true
 		if s.selectedContainerIdx > 0 {
 			s.selectedContainerIdx--
-			msgBus.send(LoadContainerLogsMsg{})
+			cmd = NewCmd(LoadContainerLogsMsg{})
 		}
 	case EnterContainerMsg:
 		s.isRunning = false
@@ -107,6 +111,8 @@ func (s *ApplicationState) Update(msg Msg, msgBus *MessageBus) {
 		}
 		s.isDirty = true
 	}
+
+	return cmd
 }
 
 func (s *ApplicationState) ContainerNames() []string {

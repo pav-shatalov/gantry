@@ -24,7 +24,7 @@ func (a AppWidget) Render(buf *tui.OutputBuffer, area geometry.Rect) {
 	}
 	verticalAreas := layout.NewVertical(area).Constraints(constraints).Areas()
 
-	topArea := paragraph.New("Top")
+	topArea := paragraph.New("Select container")
 	bottomArea := paragraph.New(
 		fmt.Sprintf(
 			"Client v%s, Server v%s, Last KeyPress: %s; Debug: %s",
