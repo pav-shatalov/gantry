@@ -18,8 +18,8 @@ func New(options []string, selectedIdx int) List {
 }
 
 func (s *List) Render(buf *tui.OutputBuffer, area geometry.Rect) {
-	col := area.X
-	row := area.Y
+	col := area.Col
+	row := area.Row
 
 	for itemIdx, item := range s.options {
 		isSelected := itemIdx == s.selected
@@ -35,7 +35,7 @@ func (s *List) Render(buf *tui.OutputBuffer, area geometry.Rect) {
 		}
 		sp.Render(buf, geometry.Position{X: col, Y: row})
 
-		col = area.X
+		col = area.Col
 		row++
 	}
 }

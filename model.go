@@ -4,11 +4,9 @@ import (
 	"fmt"
 	"gantry/docker"
 	"time"
-
-	"github.com/gdamore/tcell/v2"
 )
 
-type ApplicationState struct {
+type ApplicationModel struct {
 	debug                 string
 	isRunning             bool
 	startTime             time.Time
@@ -20,13 +18,13 @@ type ApplicationState struct {
 	next                  string
 	dockerClientVersion   string
 	dockerServerVersion   string
-	isDirty               bool
+	shouldRedraw          bool
 	counter               int
 	scrollOffset          int
 }
 
-func NewState() (ApplicationState, error) {
-	state := ApplicationState{isDirty: true}
+func NewModel() (ApplicationModel, error) {
+	state := ApplicationModel{shouldRedraw: true}
 	client, err := docker.NewClient()
 	if err != nil {
 		return state, err
@@ -44,25 +42,9 @@ func NewState() (ApplicationState, error) {
 	return state, nil
 }
 
-func (s *ApplicationState) Update(msg Msg) Cmd {
+func (s *ApplicationModel) Update(msg Msg) Cmd {
 	var cmd Cmd
-	switch m := msg.(type) {
-
-	// TODO: move it somewhere
-	case KeyPressMsg:
-		if m.Key == tcell.KeyEsc || m.Key == tcell.KeyCtrlC || m.Rune == 'q' {
-			cmd = NewCmd(ExitMsg{})
-		} else if m.Key == tcell.KeyUp || m.Rune == 'k' {
-			cmd = NewCmd(SelectPrevContainerMsg{})
-		} else if m.Key == tcell.KeyDown || m.Rune == 'j' {
-			cmd = NewCmd(SelectNextContainerMsg{})
-		} else if m.Key == tcell.KeyCR {
-			cmd = NewCmd(EnterContainerMsg{})
-		} else if m.Key == tcell.KeyCtrlD {
-			cmd = NewCmd(ScrollDownMsg{})
-		} else if m.Key == tcell.KeyCtrlU {
-			cmd = NewCmd(ScrollUpMsg{})
-		}
+	switch msg.(type) {
 	case ExitMsg:
 		s.isRunning = false
 	case LoadContainerListMsg:
@@ -75,7 +57,7 @@ func (s *ApplicationState) Update(msg Msg) Cmd {
 		s.containers = containers
 		cmd = NewCmd(LoadContainerLogsMsg{})
 	case LoadContainerLogsMsg:
-		s.isDirty = true
+		s.shouldRedraw = true
 		s.scrollOffset = 0
 		logs, err := s.client.ContainerLogs(s.containers[s.selectedContainerIdx].Id)
 		if err != nil {
@@ -85,13 +67,13 @@ func (s *ApplicationState) Update(msg Msg) Cmd {
 		s.debug = fmt.Sprintf("Loaded container logs. %d", s.counter)
 		s.counter++
 	case SelectNextContainerMsg:
-		s.isDirty = true
+		s.shouldRedraw = true
 		if len(s.containers)-1 > s.selectedContainerIdx {
 			s.selectedContainerIdx++
 			cmd = NewCmd(LoadContainerLogsMsg{})
 		}
 	case SelectPrevContainerMsg:
-		s.isDirty = true
+		s.shouldRedraw = true
 		if s.selectedContainerIdx > 0 {
 			s.selectedContainerIdx--
 			cmd = NewCmd(LoadContainerLogsMsg{})
@@ -100,22 +82,22 @@ func (s *ApplicationState) Update(msg Msg) Cmd {
 		s.isRunning = false
 		s.next = s.containers[s.selectedContainerIdx].Id
 	case ResizeMsg:
-		s.isDirty = true
+		s.shouldRedraw = true
 	case ScrollDownMsg:
 		s.scrollOffset += 5
-		s.isDirty = true
+		s.shouldRedraw = true
 	case ScrollUpMsg:
 		s.scrollOffset -= 5
 		if s.scrollOffset < 0 {
 			s.scrollOffset = 0
 		}
-		s.isDirty = true
+		s.shouldRedraw = true
 	}
 
 	return cmd
 }
 
-func (s *ApplicationState) ContainerNames() []string {
+func (s *ApplicationModel) ContainerNames() []string {
 	var names []string
 	for _, ctr := range s.containers {
 		names = append(names, ctr.Name)
@@ -124,7 +106,7 @@ func (s *ApplicationState) ContainerNames() []string {
 	return names
 }
 
-func (s *ApplicationState) ContainerTableData() [][]string {
+func (s *ApplicationModel) ContainerTableData() [][]string {
 	var rows [][]string
 	for _, ctr := range s.containers {
 		row := []string{ctr.Name, ctr.Image, ctr.Id}

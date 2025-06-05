@@ -57,7 +57,7 @@ func (b *OutputBuffer) FillFrom(tmpBuf *OutputBuffer, area geometry.Rect) {
 			remainingCols--
 
 			cell := tmpBuf.GetCell(x, y+offset)
-			b.SetCell(x+area.X, y+area.Y, cell)
+			b.SetCell(x+area.Col, y+area.Row, cell)
 			if remainingCols == 0 {
 				break
 			}

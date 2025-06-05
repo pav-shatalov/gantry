@@ -4,6 +4,7 @@ import (
 	"gantry/geometry"
 
 	"github.com/gdamore/tcell/v2"
+	_ "github.com/gdamore/tcell/v2/encoding"
 )
 
 type Terminal struct {
@@ -36,7 +37,7 @@ func InitTerminal() (Terminal, error) {
 	screen.EnableMouse()
 	screen.Clear()
 
-	app.EventChannel = make(chan tcell.Event, 8)
+	app.EventChannel = make(chan tcell.Event, 16)
 	app.quitChannel = make(chan struct{})
 
 	go screen.ChannelEvents(app.EventChannel, app.quitChannel)
@@ -48,7 +49,7 @@ func InitTerminal() (Terminal, error) {
 func (a *Terminal) Draw(widget Widget) {
 	w, h := a.Screen.Size()
 	buf := NewBuffer(w, h)
-	area := geometry.Rect{X: 0, Y: 0, Width: w, Height: h}
+	area := geometry.Rect{Col: 0, Row: 0, Width: w, Height: h}
 	widget.Render(&buf, area)
 	a.flushBuf(a.Screen, &buf)
 }

@@ -85,8 +85,8 @@ func (b *Block) Render(screen tcell.Screen, area geometry.Rect) {
 }
 
 func (b *Block) renderLeftSide(screen tcell.Screen, area geometry.Rect) {
-	col := area.X
-	row := area.Y + 1
+	col := area.Col
+	row := area.Row + 1
 	r := b.borders.right
 	for range area.Height - 2 {
 		screen.SetContent(col, row, r, []rune{}, b.borderStyle)
@@ -95,8 +95,8 @@ func (b *Block) renderLeftSide(screen tcell.Screen, area geometry.Rect) {
 }
 
 func (b *Block) renderTopSide(screen tcell.Screen, area geometry.Rect) {
-	col := area.X + 1
-	row := area.Y
+	col := area.Col + 1
+	row := area.Row
 	r := b.borders.top
 	for range area.Width - 2 {
 		screen.SetContent(col, row, r, []rune{}, b.borderStyle)
@@ -105,8 +105,8 @@ func (b *Block) renderTopSide(screen tcell.Screen, area geometry.Rect) {
 }
 
 func (b *Block) renderRightSide(screen tcell.Screen, area geometry.Rect) {
-	col := area.X + area.Width - 1
-	row := area.Y + 1
+	col := area.Col + area.Width - 1
+	row := area.Row + 1
 	r := b.borders.right
 
 	for range area.Height - 2 {
@@ -116,8 +116,8 @@ func (b *Block) renderRightSide(screen tcell.Screen, area geometry.Rect) {
 }
 
 func (b *Block) renderBottomSide(screen tcell.Screen, area geometry.Rect) {
-	col := area.X + 1
-	row := area.Y + area.Height - 1
+	col := area.Col + 1
+	row := area.Row + area.Height - 1
 	r := b.borders.bottom
 
 	for range area.Width - 2 {
@@ -128,8 +128,8 @@ func (b *Block) renderBottomSide(screen tcell.Screen, area geometry.Rect) {
 
 func (b *Block) renderTopLeftCorner(screen tcell.Screen, area geometry.Rect) {
 	screen.SetContent(
-		area.X,
-		area.Y,
+		area.Col,
+		area.Row,
 		b.borders.topLeft,
 		[]rune{},
 		b.borderStyle,
@@ -138,8 +138,8 @@ func (b *Block) renderTopLeftCorner(screen tcell.Screen, area geometry.Rect) {
 
 func (b *Block) renderTopRightCorner(screen tcell.Screen, area geometry.Rect) {
 	screen.SetContent(
-		area.X+area.Width-1,
-		area.Y,
+		area.Col+area.Width-1,
+		area.Row,
 		b.borders.topRight,
 		[]rune{},
 		b.borderStyle,
@@ -148,8 +148,8 @@ func (b *Block) renderTopRightCorner(screen tcell.Screen, area geometry.Rect) {
 
 func (b *Block) renderBottomRightCorner(screen tcell.Screen, area geometry.Rect) {
 	screen.SetContent(
-		area.X+area.Width-1,
-		area.Y+area.Height-1,
+		area.Col+area.Width-1,
+		area.Row+area.Height-1,
 		b.borders.bottomRight,
 		[]rune{},
 		b.borderStyle,
@@ -158,8 +158,8 @@ func (b *Block) renderBottomRightCorner(screen tcell.Screen, area geometry.Rect)
 
 func (b *Block) renderBottomLeftCorner(screen tcell.Screen, area geometry.Rect) {
 	screen.SetContent(
-		area.X,
-		area.Y+area.Height-1,
+		area.Col,
+		area.Row+area.Height-1,
 		b.borders.bottomLeft,
 		[]rune{},
 		b.borderStyle,
@@ -170,8 +170,8 @@ func (b *Block) renderTitle(screen tcell.Screen, area geometry.Rect) {
 	if len(b.title) == 0 {
 		return
 	}
-	col := area.X + 2
-	row := area.Y
+	col := area.Col + 2
+	row := area.Row
 	title := " " + b.title + " "
 	for _, c := range title {
 		screen.SetContent(col, row, c, []rune{}, b.titleStyle)
@@ -181,8 +181,8 @@ func (b *Block) renderTitle(screen tcell.Screen, area geometry.Rect) {
 
 func (b *Block) InnerArea(area geometry.Rect) geometry.Rect {
 	return geometry.Rect{
-		X:      area.X + 1,
-		Y:      area.Y + 1,
+		Col:    area.Col + 1,
+		Row:    area.Row + 1,
 		Width:  area.Width - 2,
 		Height: area.Height - 2,
 	}

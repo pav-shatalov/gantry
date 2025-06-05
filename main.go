@@ -19,41 +19,41 @@ func main() {
 	// go func() {
 	// 	http.ListenAndServe(":6060", nil)
 	// }()
-	state, err := NewState()
 	messageBus := NewMessageBus()
-	if err != nil {
-		log.Fatal(err)
-	}
 	messageBus.send(LoadContainerListMsg{})
 	terminal, err := tui.InitTerminal()
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	model, err := NewModel()
+	if err != nil {
+		log.Fatal(err)
+	}
 	var frames int
 	var renderCalls int
-	appWidget := AppWidget{state: &state}
+	appWidget := AppWidget{model: &model}
 
 	for {
 		defer func() {
 			if r := recover(); r != nil {
-				state.isRunning = false
+				model.isRunning = false
 				terminal.RestoreTerm()
 				log.Fatal(r)
 			}
 		}()
 
-		if state.isDirty {
+		if model.shouldRedraw {
 			terminal.Draw(appWidget)
-			state.isDirty = false
+			model.shouldRedraw = false
 			renderCalls++
 		}
 		frames++
 
 		handleEvent(&messageBus, &terminal)
-		handleMsg(&messageBus, &state)
+		handleMsg(&messageBus, &model)
 
-		if !state.isRunning {
+		if !model.isRunning {
 			break
 		}
 
@@ -61,13 +61,13 @@ func main() {
 	}
 
 	terminal.RestoreTerm()
-	duration := time.Since(state.startTime)
+	duration := time.Since(model.startTime)
 	fps := int(float64(frames) / duration.Seconds())
 	fmt.Printf("FPS: %d\n", fps)
 	fmt.Printf("Render calls: %d\n", renderCalls)
 
-	if state.next != "" {
-		cmd := exec.Command("docker", "exec", "-ti", state.next, "bash")
+	if model.next != "" {
+		cmd := exec.Command("docker", "exec", "-ti", model.next, "bash")
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		cmd.Stdin = os.Stdin
@@ -84,7 +84,19 @@ func handleEvent(msgBus *MessageBus, terminal *tui.Terminal) {
 	case event := <-terminal.EventChannel:
 		switch ev := event.(type) {
 		case *tcell.EventKey:
-			msgBus.send(KeyPressMsg{KeyString: ev.Name(), Key: ev.Key(), Rune: ev.Rune()})
+			if ev.Key() == tcell.KeyEsc || ev.Key() == tcell.KeyCtrlC || ev.Rune() == 'q' {
+				msgBus.send(ExitMsg{})
+			} else if ev.Key() == tcell.KeyUp || ev.Rune() == 'k' {
+				msgBus.send(SelectPrevContainerMsg{})
+			} else if ev.Key() == tcell.KeyDown || ev.Rune() == 'j' {
+				msgBus.send(SelectNextContainerMsg{})
+			} else if ev.Key() == tcell.KeyCR {
+				msgBus.send(EnterContainerMsg{})
+			} else if ev.Key() == tcell.KeyCtrlD {
+				msgBus.send(ScrollDownMsg{})
+			} else if ev.Key() == tcell.KeyCtrlU {
+				msgBus.send(ScrollUpMsg{})
+			}
 		case *tcell.EventResize:
 			msgBus.send(ResizeMsg{})
 		}
@@ -92,7 +104,7 @@ func handleEvent(msgBus *MessageBus, terminal *tui.Terminal) {
 	}
 }
 
-func handleMsg(msgBus *MessageBus, state *ApplicationState) {
+func handleMsg(msgBus *MessageBus, state *ApplicationModel) {
 	select {
 	case msg := <-msgBus.ch:
 		state.debug = fmt.Sprintf("New Msg %#v", msg)

@@ -27,8 +27,8 @@ func NewHorizontal() Divider {
 
 func (s *Divider) Render(buf *tui.OutputBuffer, area geometry.Rect) {
 	dim := area.Width
-	row := area.Y
-	col := area.X
+	row := area.Row
+	col := area.Col
 
 	if s.direction == vertical {
 		dim = area.Height

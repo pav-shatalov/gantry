@@ -50,8 +50,8 @@ func (l Layout) Constraints(constraints []Constraint) Layout {
 
 func (l Layout) Areas() []geometry.Rect {
 	var areas []geometry.Rect
-	x := l.area.X
-	y := l.area.Y
+	x := l.area.Col
+	y := l.area.Row
 
 	solver := cassowary.NewSolver()
 	containerSize := l.area.Width
@@ -103,8 +103,8 @@ func (l Layout) Areas() []geometry.Rect {
 		}
 
 		newArea := geometry.Rect{
-			X:      x,
-			Y:      y,
+			Col:    x,
+			Row:    y,
 			Width:  width,
 			Height: height,
 		}

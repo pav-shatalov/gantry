@@ -13,7 +13,7 @@ import (
 )
 
 type AppWidget struct {
-	state *ApplicationState
+	model *ApplicationModel
 }
 
 func (a AppWidget) Render(buf *tui.OutputBuffer, area geometry.Rect) {
@@ -28,10 +28,10 @@ func (a AppWidget) Render(buf *tui.OutputBuffer, area geometry.Rect) {
 	bottomArea := paragraph.New(
 		fmt.Sprintf(
 			"Client v%s, Server v%s, Last KeyPress: %s; Debug: %s",
-			a.state.dockerClientVersion,
-			a.state.dockerServerVersion,
-			a.state.lastKey,
-			a.state.debug,
+			a.model.dockerClientVersion,
+			a.model.dockerServerVersion,
+			a.model.lastKey,
+			a.model.debug,
 		),
 	)
 	topArea.Render(buf, verticalAreas[0])
@@ -43,8 +43,8 @@ func (a AppWidget) Render(buf *tui.OutputBuffer, area geometry.Rect) {
 	}).Areas()
 
 	containerListBlock := container.New(midAreaSplit[2], geometry.Position{X: 0, Y: 0}).WithPadding(0, 0, 0, 1)
-	containerList := list.New(a.state.ContainerNames(), a.state.selectedContainerIdx)
-	containerInfo := paragraph.New(strings.Join(a.state.selectedContainerLogs, "\n")).Scroll(a.state.scrollOffset)
+	containerList := list.New(a.model.ContainerNames(), a.model.selectedContainerIdx)
+	containerInfo := paragraph.New(strings.Join(a.model.selectedContainerLogs, "\n")).Scroll(a.model.scrollOffset)
 	divider := divider.NewVertical()
 
 	topArea.Render(buf, verticalAreas[0])

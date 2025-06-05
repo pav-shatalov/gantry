@@ -20,7 +20,7 @@ func TestMerging(t *testing.T) {
 	subBuf := tui.NewBuffer(10, 10)
 	subBuf.SetContent(0, 0, '1', tui.StyleDefault)
 
-	buf.FillFrom(&subBuf, geometry.Rect{X: 0, Y: 0, Width: 10, Height: 10})
+	buf.FillFrom(&subBuf, geometry.Rect{Col: 0, Row: 0, Width: 10, Height: 10})
 
 	cell := buf.GetCell(0, 0)
 

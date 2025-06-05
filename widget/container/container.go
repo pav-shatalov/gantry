@@ -29,8 +29,8 @@ func (c Container) WithPadding(top int, right int, bottom int, left int) Contain
 
 func (c *Container) InnerArea() geometry.Rect {
 	return geometry.Rect{
-		X:      c.area.X + c.padding.left,
-		Y:      c.area.Y + c.padding.top,
+		Col:    c.area.Col + c.padding.left,
+		Row:    c.area.Row + c.padding.top,
 		Width:  c.area.Width - (c.padding.left + c.padding.right),
 		Height: c.area.Height - (c.padding.top + c.padding.bottom),
 	}

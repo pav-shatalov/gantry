@@ -29,8 +29,8 @@ func NewTable(inputRows [][]string) Table {
 }
 
 func (t *Table) Render(screen tcell.Screen, area geometry.Rect) {
-	col := area.X
-	row := area.Y
+	col := area.Col
+	row := area.Row
 
 	var constraints []layout.Constraint
 	for range len(t.rows[0]) {
@@ -45,8 +45,8 @@ func (t *Table) Render(screen tcell.Screen, area geometry.Rect) {
 				cellCol += layout[i-1].Width
 			}
 			cellArea := geometry.Rect{
-				X:      cellCol,
-				Y:      row,
+				Col:    cellCol,
+				Row:    row,
 				Width:  layout[i].Width,
 				Height: layout[i].Height,
 			}
@@ -57,8 +57,8 @@ func (t *Table) Render(screen tcell.Screen, area geometry.Rect) {
 }
 
 func renderCell(cell Cell, screen tcell.Screen, area geometry.Rect) {
-	col := area.X
-	row := area.Y
+	col := area.Col
+	row := area.Row
 
 	runes := []rune(cell)
 

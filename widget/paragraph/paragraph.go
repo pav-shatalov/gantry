@@ -3,6 +3,7 @@ package paragraph
 import (
 	"gantry/geometry"
 	"gantry/tui"
+	"regexp"
 
 	"github.com/mattn/go-runewidth"
 )
@@ -10,6 +11,14 @@ import (
 type Paragraph struct {
 	text   string
 	scroll int
+}
+
+const ansi = "[\u001B\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[a-zA-Z\\d]*)*)?\u0007)|(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PRZcf-ntqry=><~]))"
+
+var re = regexp.MustCompile(ansi)
+
+func Strip(str string) string {
+	return re.ReplaceAllString(str, "")
 }
 
 func reflow(s string, maxLength int) []string {
@@ -27,7 +36,7 @@ func reflow(s string, maxLength int) []string {
 			continue
 		}
 
-		w := runewidth.RuneWidth(r)
+		w := max(runewidth.RuneWidth(r), 1)
 		if width+w > maxLength {
 			lines = append(lines, string(line))
 			line = []rune{r}
@@ -46,11 +55,12 @@ func reflow(s string, maxLength int) []string {
 }
 
 func (p *Paragraph) Render(buf *tui.OutputBuffer, area geometry.Rect) {
-	if len(p.text) == 0 {
+	withoutAnsi := Strip(p.text)
+	if len(withoutAnsi) == 0 {
 		return
 	}
 
-	t := reflow(p.text, area.Width-1)
+	t := reflow(withoutAnsi, area.Width)
 
 	remainingRows := area.Height
 	idx := 0
@@ -59,8 +69,17 @@ func (p *Paragraph) Render(buf *tui.OutputBuffer, area geometry.Rect) {
 		if remainingRows == 0 {
 			break
 		}
+
+		remainingCols := area.Width
 		for x, r := range t[y] {
-			buf.SetContent(x+area.X, area.Y+idx, r, tui.StyleDefault)
+			if remainingCols == 0 {
+				break
+			}
+
+			buf.SetContent(x+area.Col, area.Row+idx, r, tui.StyleDefault)
+			w := max(runewidth.RuneWidth(r), 1)
+			remainingCols -= w
+			x += w
 		}
 		remainingRows--
 		idx++
