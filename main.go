@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"runtime/debug"
 	"time"
 
 	// "net/http"
@@ -19,14 +20,17 @@ func main() {
 	// go func() {
 	// 	http.ListenAndServe(":6060", nil)
 	// }()
+	log.SetFlags(log.Lshortfile | log.LstdFlags)
+	log.Printf("Starting app")
 	messageBus := NewMessageBus()
 	messageBus.send(LoadContainerListMsg{})
 	terminal, err := tui.InitTerminal()
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.Printf("Creating model")
 
-	model, err := NewModel()
+	model, err := NewModel(terminal.Area)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -39,6 +43,7 @@ func main() {
 			if r := recover(); r != nil {
 				model.isRunning = false
 				terminal.RestoreTerm()
+				debug.PrintStack()
 				log.Fatal(r)
 			}
 		}()

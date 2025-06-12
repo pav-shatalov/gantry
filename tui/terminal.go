@@ -12,6 +12,7 @@ type Terminal struct {
 	EventChannel chan tcell.Event
 	quitChannel  chan struct{}
 	colorMap     map[Color]tcell.Color
+	Area         geometry.Rect
 }
 
 func colorMap() map[Color]tcell.Color {
@@ -37,6 +38,9 @@ func InitTerminal() (Terminal, error) {
 	screen.EnableMouse()
 	screen.Clear()
 
+	w, h := screen.Size()
+	app.Area = geometry.NewRect(0, 0, w, h)
+
 	app.EventChannel = make(chan tcell.Event, 16)
 	app.quitChannel = make(chan struct{})
 
@@ -47,10 +51,10 @@ func InitTerminal() (Terminal, error) {
 }
 
 func (a *Terminal) Draw(widget Widget) {
-	w, h := a.Screen.Size()
+	w := a.Area.Width
+	h := a.Area.Height
 	buf := NewBuffer(w, h)
-	area := geometry.Rect{Col: 0, Row: 0, Width: w, Height: h}
-	widget.Render(&buf, area)
+	widget.Render(&buf, a.Area)
 	a.flushBuf(a.Screen, &buf)
 }
 

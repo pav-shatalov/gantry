@@ -3,10 +3,13 @@ package main
 import (
 	"fmt"
 	"gantry/docker"
+	"gantry/geometry"
+	"gantry/model"
 	"time"
 )
 
 type ApplicationModel struct {
+	layoutModel           model.LayoutModel
 	debug                 string
 	isRunning             bool
 	startTime             time.Time
@@ -23,8 +26,11 @@ type ApplicationModel struct {
 	scrollOffset          int
 }
 
-func NewModel() (ApplicationModel, error) {
-	state := ApplicationModel{shouldRedraw: true}
+func NewModel(area geometry.Rect) (ApplicationModel, error) {
+	state := ApplicationModel{
+		shouldRedraw: true,
+		layoutModel:  model.NewLayoutModel(area),
+	}
 	client, err := docker.NewClient()
 	if err != nil {
 		return state, err

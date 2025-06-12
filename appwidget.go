@@ -17,12 +17,15 @@ type AppWidget struct {
 }
 
 func (a AppWidget) Render(buf *tui.OutputBuffer, area geometry.Rect) {
-	constraints := []layout.Constraint{
-		layout.NewMin(2),
-		layout.NewPercentage(100),
-		layout.NewMin(1),
+	if area.Width == 0 {
+		return
 	}
-	verticalAreas := layout.NewVertical(area).Constraints(constraints).Areas()
+	// constraints := []layout.Constraint{
+	// 	layout.NewMin(2),
+	// 	layout.NewPercentage(100),
+	// 	layout.NewMin(1),
+	// }
+	// verticalAreas := layout.NewVertical(area).Constraints(constraints).Areas()
 
 	topArea := paragraph.New("Select container")
 	bottomArea := paragraph.New(
@@ -34,9 +37,9 @@ func (a AppWidget) Render(buf *tui.OutputBuffer, area geometry.Rect) {
 			a.model.debug,
 		),
 	)
-	topArea.Render(buf, verticalAreas[0])
-	bottomArea.Render(buf, verticalAreas[2])
-	midAreaSplit := layout.NewHorizontal(verticalAreas[1]).Constraints([]layout.Constraint{
+	topArea.Render(buf, a.model.layoutModel.HeaderArea)
+	bottomArea.Render(buf, a.model.layoutModel.BottomArea)
+	midAreaSplit := layout.NewHorizontal(a.model.layoutModel.MidArea).Constraints([]layout.Constraint{
 		layout.NewPercentage(30),
 		layout.NewLength(1),
 		layout.NewPercentage(70),
@@ -47,8 +50,8 @@ func (a AppWidget) Render(buf *tui.OutputBuffer, area geometry.Rect) {
 	containerInfo := paragraph.New(strings.Join(a.model.selectedContainerLogs, "\n")).Scroll(a.model.scrollOffset)
 	divider := divider.NewVertical()
 
-	topArea.Render(buf, verticalAreas[0])
-	bottomArea.Render(buf, verticalAreas[2])
+	topArea.Render(buf, a.model.layoutModel.HeaderArea)
+	bottomArea.Render(buf, a.model.layoutModel.BottomArea)
 	containerList.Render(buf, midAreaSplit[0])
 	divider.Render(buf, midAreaSplit[1])
 	containerInfo.Render(buf, containerListBlock.InnerArea())
