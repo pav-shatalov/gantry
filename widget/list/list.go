@@ -29,9 +29,9 @@ func (s *List) Render(buf *tui.OutputBuffer, area geometry.Rect) {
 			markerSpan.Render(buf, geometry.Position{X: col, Y: row})
 			col += runewidth.RuneWidth(marker)
 		}
-		sp := span.New(item)
+		sp := span.New(item).Padding(1)
 		if !isSelected {
-			sp = sp.Padding(1)
+			sp = sp.Padding(2)
 		}
 		sp.Render(buf, geometry.Position{X: col, Y: row})
 

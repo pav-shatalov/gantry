@@ -28,7 +28,7 @@ func (b *MessageBus) send(msg Msg) {
 	case b.ch <- msg:
 		// ok
 	default:
-		// dropped
+		// dropped?
 	}
 }
 

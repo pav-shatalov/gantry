@@ -6,9 +6,11 @@ import (
 )
 
 type LayoutModel struct {
-	HeaderArea geometry.Rect
-	MidArea    geometry.Rect
-	BottomArea geometry.Rect
+	HeaderArea          geometry.Rect
+	BottomArea          geometry.Rect
+	ContainerListArea   geometry.Rect
+	VerticalDividerArea geometry.Rect
+	LogsArea            geometry.Rect
 }
 
 func NewLayoutModel(area geometry.Rect) LayoutModel {
@@ -19,9 +21,17 @@ func NewLayoutModel(area geometry.Rect) LayoutModel {
 	}
 	verticalAreas := layout.NewVertical(area).Constraints(constraints).Areas()
 
+	midAreaSplit := layout.NewHorizontal(verticalAreas[1]).Constraints([]layout.Constraint{
+		layout.NewPercentage(30),
+		layout.NewLength(1),
+		layout.NewPercentage(70),
+	}).Areas()
+
 	return LayoutModel{
-		HeaderArea: verticalAreas[0],
-		MidArea:    verticalAreas[1],
-		BottomArea: verticalAreas[2],
+		HeaderArea:          verticalAreas[0],
+		BottomArea:          verticalAreas[2],
+		ContainerListArea:   midAreaSplit[0],
+		VerticalDividerArea: midAreaSplit[1],
+		LogsArea:            midAreaSplit[2],
 	}
 }
