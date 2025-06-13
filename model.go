@@ -10,6 +10,7 @@ import (
 
 type ApplicationModel struct {
 	layoutModel           model.LayoutModel
+	logsModel             model.LogsViewModel
 	debug                 string
 	isRunning             bool
 	startTime             time.Time
@@ -23,13 +24,14 @@ type ApplicationModel struct {
 	dockerServerVersion   string
 	shouldRedraw          bool
 	counter               int
-	scrollOffset          int
 }
 
 func NewModel(area geometry.Rect) (ApplicationModel, error) {
+	layoutModel := model.NewLayoutModel(area)
 	state := ApplicationModel{
 		shouldRedraw: true,
-		layoutModel:  model.NewLayoutModel(area),
+		layoutModel:  layoutModel,
+		logsModel:    model.NewLogsViewModel([]string{}, layoutModel.LogsArea),
 	}
 	client, err := docker.NewClient()
 	if err != nil {
@@ -64,12 +66,12 @@ func (s *ApplicationModel) Update(msg Msg) Cmd {
 		cmd = NewCmd(LoadContainerLogsMsg{})
 	case LoadContainerLogsMsg:
 		s.shouldRedraw = true
-		s.scrollOffset = 0
 		logs, err := s.client.ContainerLogs(s.containers[s.selectedContainerIdx].Id)
 		if err != nil {
 			s.debug = fmt.Sprint(err)
 		}
 		s.selectedContainerLogs = logs
+		s.logsModel.SetLines(s.selectedContainerLogs)
 		s.debug = fmt.Sprintf("Loaded container logs. %d", s.counter)
 		s.counter++
 	case SelectNextContainerMsg:
@@ -90,12 +92,15 @@ func (s *ApplicationModel) Update(msg Msg) Cmd {
 	case ResizeMsg:
 		s.shouldRedraw = true
 	case ScrollDownMsg:
-		s.scrollOffset += 5
+		s.logsModel.Scroll += 5
+		if s.logsModel.Scroll > len(s.logsModel.Lines)-1 {
+			s.logsModel.Scroll = len(s.logsModel.Lines) - 1
+		}
 		s.shouldRedraw = true
 	case ScrollUpMsg:
-		s.scrollOffset -= 5
-		if s.scrollOffset < 0 {
-			s.scrollOffset = 0
+		s.logsModel.Scroll -= 5
+		if s.logsModel.Scroll < 0 {
+			s.logsModel.Scroll = 0
 		}
 		s.shouldRedraw = true
 	}

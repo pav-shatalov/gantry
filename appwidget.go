@@ -4,11 +4,9 @@ import (
 	"fmt"
 	"gantry/geometry"
 	"gantry/tui"
-	"gantry/widget/container"
 	"gantry/widget/divider"
 	"gantry/widget/list"
 	"gantry/widget/paragraph"
-	"strings"
 )
 
 type AppWidget struct {
@@ -16,26 +14,27 @@ type AppWidget struct {
 }
 
 func (a AppWidget) Render(buf *tui.OutputBuffer, area geometry.Rect) {
-	topArea := paragraph.New("Select container")
-	bottomArea := paragraph.New(
+	headerInfo := paragraph.New([]string{"Select container"})
+	debugInfo := paragraph.New([]string{
 		fmt.Sprintf(
-			"Client v%s, Server v%s, Debug: %s",
+			"Client v%s, Server v%s, Debug: %s, Scroll: %d, Lines: %d",
 			a.model.dockerClientVersion,
 			a.model.dockerServerVersion,
 			a.model.debug,
+			a.model.logsModel.Scroll,
+			len(a.model.logsModel.Lines),
 		),
-	)
-	topArea.Render(buf, a.model.layoutModel.HeaderArea)
-	bottomArea.Render(buf, a.model.layoutModel.BottomArea)
+	})
 
-	containerLogsBlock := container.New(a.model.layoutModel.LogsArea, geometry.Position{X: 0, Y: 0}).WithPadding(0, 0, 0, 1)
+	// containerLogsBlock := container.New(a.model.layoutModel.LogsArea, geometry.Position{X: 0, Y: 0}).WithPadding(0, 0, 0, 1)
 	containerList := list.New(a.model.ContainerNames(), a.model.selectedContainerIdx)
-	containerInfo := paragraph.New(strings.Join(a.model.selectedContainerLogs, "\n")).Scroll(a.model.scrollOffset)
+	containerInfo := paragraph.New(a.model.logsModel.Lines).Scroll(a.model.logsModel.Scroll)
+
 	divider := divider.NewVertical()
 
-	topArea.Render(buf, a.model.layoutModel.HeaderArea)
-	bottomArea.Render(buf, a.model.layoutModel.BottomArea)
+	headerInfo.Render(buf, a.model.layoutModel.HeaderArea)
+	debugInfo.Render(buf, a.model.layoutModel.BottomArea)
 	containerList.Render(buf, a.model.layoutModel.ContainerListArea)
 	divider.Render(buf, a.model.layoutModel.VerticalDividerArea)
-	containerInfo.Render(buf, containerLogsBlock.InnerArea())
+	containerInfo.Render(buf, a.model.layoutModel.LogsArea)
 }

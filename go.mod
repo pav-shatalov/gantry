@@ -6,6 +6,7 @@ require (
 	github.com/docker/docker v28.1.1+incompatible
 	github.com/gdamore/tcell/v2 v2.8.1
 	github.com/mattn/go-runewidth v0.0.16
+	github.com/muesli/reflow v0.3.0
 	golang.org/x/sys v0.33.0
 )
 
