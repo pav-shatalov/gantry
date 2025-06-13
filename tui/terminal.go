@@ -1,8 +1,6 @@
 package tui
 
 import (
-	"gantry/geometry"
-
 	"github.com/gdamore/tcell/v2"
 	_ "github.com/gdamore/tcell/v2/encoding"
 )
@@ -12,7 +10,7 @@ type Terminal struct {
 	EventChannel chan tcell.Event
 	quitChannel  chan struct{}
 	colorMap     map[Color]tcell.Color
-	Area         geometry.Rect
+	Area         Rect
 }
 
 func colorMap() map[Color]tcell.Color {
@@ -39,7 +37,7 @@ func InitTerminal() (Terminal, error) {
 	screen.Clear()
 
 	w, h := screen.Size()
-	app.Area = geometry.NewRect(0, 0, w, h)
+	app.Area = NewRect(0, 0, w, h)
 
 	app.EventChannel = make(chan tcell.Event, 16)
 	app.quitChannel = make(chan struct{})

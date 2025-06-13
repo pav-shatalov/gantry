@@ -2,7 +2,7 @@ package layout
 
 import (
 	"gantry/cassowary"
-	"gantry/geometry"
+	"gantry/tui"
 	"math"
 )
 
@@ -14,23 +14,23 @@ const (
 )
 
 type Layout struct {
-	area      geometry.Rect
+	area      tui.Rect
 	items     []Constraint
 	direction Direction
 }
 
-func New(area geometry.Rect, d Direction) Layout {
+func New(area tui.Rect, d Direction) Layout {
 	return Layout{
 		area:      area,
 		direction: d,
 	}
 }
 
-func NewHorizontal(area geometry.Rect) Layout {
+func NewHorizontal(area tui.Rect) Layout {
 	return New(area, Horizontal)
 }
 
-func NewVertical(area geometry.Rect) Layout {
+func NewVertical(area tui.Rect) Layout {
 	return New(area, Vertical)
 }
 
@@ -48,8 +48,8 @@ func (l Layout) Constraints(constraints []Constraint) Layout {
 	return l
 }
 
-func (l Layout) Areas() []geometry.Rect {
-	var areas []geometry.Rect
+func (l Layout) Areas() []tui.Rect {
+	var areas []tui.Rect
 	x := l.area.Col
 	y := l.area.Row
 
@@ -102,13 +102,7 @@ func (l Layout) Areas() []geometry.Rect {
 			height = val
 		}
 
-		newArea := geometry.Rect{
-			Col:    x,
-			Row:    y,
-			Width:  width,
-			Height: height,
-		}
-
+		newArea := tui.NewRect(x, y, width, height)
 		areas = append(areas, newArea)
 		if l.direction == Vertical {
 			y += height

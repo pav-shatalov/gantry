@@ -1,7 +1,6 @@
 package list
 
 import (
-	"gantry/geometry"
 	"gantry/tui"
 	"gantry/widget/span"
 
@@ -17,7 +16,7 @@ func New(options []string, selectedIdx int) List {
 	return List{options: options, selected: selectedIdx}
 }
 
-func (s *List) Render(buf *tui.OutputBuffer, area geometry.Rect) {
+func (s *List) Render(buf *tui.OutputBuffer, area tui.Rect) {
 	col := area.Col
 	row := area.Row
 
@@ -26,14 +25,14 @@ func (s *List) Render(buf *tui.OutputBuffer, area geometry.Rect) {
 		if isSelected {
 			marker := '›'
 			markerSpan := span.New(string(marker))
-			markerSpan.Render(buf, geometry.Position{X: col, Y: row})
+			markerSpan.Render(buf, tui.NewPosition(col, row))
 			col += runewidth.RuneWidth(marker)
 		}
 		sp := span.New(item).Padding(1)
 		if !isSelected {
 			sp = sp.Padding(2)
 		}
-		sp.Render(buf, geometry.Position{X: col, Y: row})
+		sp.Render(buf, tui.NewPosition(col, row))
 
 		col = area.Col
 		row++

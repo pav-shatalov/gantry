@@ -1,7 +1,7 @@
 package model
 
 import (
-	"gantry/geometry"
+	"gantry/tui"
 	"regexp"
 	"strings"
 
@@ -11,7 +11,7 @@ import (
 type LogsViewModel struct {
 	Lines      []string
 	Scroll     int
-	area       geometry.Rect
+	area       tui.Rect
 	AutoScroll bool
 }
 
@@ -22,7 +22,7 @@ func wrappedLines(lines []string, w int) []string {
 	return strings.Split(wrap.String(asText, w), "\n")
 }
 
-func NewLogsViewModel(logs []string, area geometry.Rect) LogsViewModel {
+func NewLogsViewModel(logs []string, area tui.Rect) LogsViewModel {
 	lines := wrappedLines(logs, area.Width)
 	scroll := scrollPosition(lines, area)
 
@@ -46,6 +46,6 @@ func (m *LogsViewModel) Reflow() {
 	m.SetLines(m.Lines)
 }
 
-func scrollPosition(lines []string, area geometry.Rect) int {
+func scrollPosition(lines []string, area tui.Rect) int {
 	return max(len(lines)-area.Height+10, 0)
 }

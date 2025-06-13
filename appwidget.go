@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"gantry/geometry"
 	"gantry/tui"
 	"gantry/widget/divider"
 	"gantry/widget/list"
@@ -13,7 +12,7 @@ type AppWidget struct {
 	model *ApplicationModel
 }
 
-func (a AppWidget) Render(buf *tui.OutputBuffer, area geometry.Rect) {
+func (a AppWidget) Render(buf *tui.OutputBuffer, area tui.Rect) {
 	headerInfo := paragraph.New([]string{"Select container"})
 	debugInfo := paragraph.New([]string{
 		fmt.Sprintf(

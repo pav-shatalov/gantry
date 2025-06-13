@@ -1,7 +1,6 @@
 package divider
 
 import (
-	"gantry/geometry"
 	"gantry/tui"
 )
 
@@ -25,7 +24,7 @@ func NewHorizontal() Divider {
 	return Divider{direction: horizontal, r: '─'}
 }
 
-func (s *Divider) Render(buf *tui.OutputBuffer, area geometry.Rect) {
+func (s *Divider) Render(buf *tui.OutputBuffer, area tui.Rect) {
 	dim := area.Width
 	row := area.Row
 	col := area.Col

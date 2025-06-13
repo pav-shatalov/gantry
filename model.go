@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"gantry/docker"
-	"gantry/geometry"
 	"gantry/model"
+	"gantry/tui"
 	"time"
 )
 
@@ -26,7 +26,7 @@ type ApplicationModel struct {
 	counter               int
 }
 
-func NewModel(area geometry.Rect) (ApplicationModel, error) {
+func NewModel(area tui.Rect) (ApplicationModel, error) {
 	layoutModel := model.NewLayoutModel(area)
 	state := ApplicationModel{
 		shouldRedraw: true,

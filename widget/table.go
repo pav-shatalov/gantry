@@ -1,8 +1,8 @@
 package widget
 
 import (
-	"gantry/geometry"
 	"gantry/layout"
+	"gantry/tui"
 
 	"github.com/gdamore/tcell/v2"
 )
@@ -28,7 +28,7 @@ func NewTable(inputRows [][]string) Table {
 	return Table{rows: rows}
 }
 
-func (t *Table) Render(screen tcell.Screen, area geometry.Rect) {
+func (t *Table) Render(screen tcell.Screen, area tui.Rect) {
 	col := area.Col
 	row := area.Row
 
@@ -44,19 +44,14 @@ func (t *Table) Render(screen tcell.Screen, area geometry.Rect) {
 			if i > 0 {
 				cellCol += layout[i-1].Width
 			}
-			cellArea := geometry.Rect{
-				Col:    cellCol,
-				Row:    row,
-				Width:  layout[i].Width,
-				Height: layout[i].Height,
-			}
+			cellArea := tui.NewRect(cellCol, row, layout[i].Width, layout[i].Height)
 			renderCell(c, screen, cellArea)
 		}
 		row++
 	}
 }
 
-func renderCell(cell Cell, screen tcell.Screen, area geometry.Rect) {
+func renderCell(cell Cell, screen tcell.Screen, area tui.Rect) {
 	col := area.Col
 	row := area.Row
 

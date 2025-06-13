@@ -1,11 +1,7 @@
 package tui
 
-import (
-	"gantry/geometry"
-)
-
 type Widget interface {
-	Render(buf *OutputBuffer, area geometry.Rect)
+	Render(buf *OutputBuffer, area Rect)
 }
 
 type BlockWidget struct{}

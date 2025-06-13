@@ -1,7 +1,6 @@
 package container
 
 import (
-	"gantry/geometry"
 	"gantry/tui"
 )
 
@@ -12,13 +11,14 @@ type Padding struct {
 	left   int
 }
 
+// TODO: Remove it?
 type Container struct {
-	area    geometry.Rect
-	scroll  geometry.Position
+	area    tui.Rect
+	scroll  tui.Position
 	padding Padding
 }
 
-func New(area geometry.Rect, scroll geometry.Position) Container {
+func New(area tui.Rect, scroll tui.Position) Container {
 	return Container{area: area, scroll: scroll}
 }
 
@@ -27,15 +27,15 @@ func (c Container) WithPadding(top int, right int, bottom int, left int) Contain
 	return c
 }
 
-func (c *Container) InnerArea() geometry.Rect {
-	return geometry.Rect{
-		Col:    c.area.Col + c.padding.left,
-		Row:    c.area.Row + c.padding.top,
-		Width:  c.area.Width - (c.padding.left + c.padding.right),
-		Height: c.area.Height - (c.padding.top + c.padding.bottom),
-	}
+func (c *Container) InnerArea() tui.Rect {
+	return tui.NewRect(
+		c.area.Col+c.padding.left,
+		c.area.Row+c.padding.top,
+		c.area.Width-(c.padding.left+c.padding.right),
+		c.area.Height-(c.padding.top+c.padding.bottom),
+	)
 }
 
-func (c *Container) Render(buf tui.OutputBuffer, area geometry.Rect) {
+func (c *Container) Render(buf tui.OutputBuffer, area tui.Rect) {
 
 }

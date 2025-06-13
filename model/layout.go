@@ -1,19 +1,19 @@
 package model
 
 import (
-	"gantry/geometry"
 	"gantry/layout"
+	"gantry/tui"
 )
 
 type LayoutModel struct {
-	HeaderArea          geometry.Rect
-	BottomArea          geometry.Rect
-	ContainerListArea   geometry.Rect
-	VerticalDividerArea geometry.Rect
-	LogsArea            geometry.Rect
+	HeaderArea          tui.Rect
+	BottomArea          tui.Rect
+	ContainerListArea   tui.Rect
+	VerticalDividerArea tui.Rect
+	LogsArea            tui.Rect
 }
 
-func NewLayoutModel(area geometry.Rect) LayoutModel {
+func NewLayoutModel(area tui.Rect) LayoutModel {
 	constraints := []layout.Constraint{
 		layout.NewMin(2),
 		layout.NewPercentage(100),

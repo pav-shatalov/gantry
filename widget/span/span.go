@@ -1,7 +1,6 @@
 package span
 
 import (
-	"gantry/geometry"
 	"gantry/tui"
 )
 
@@ -24,9 +23,9 @@ func (s Span) Padding(padding int) Span {
 	return s
 }
 
-func (s *Span) Render(buf *tui.OutputBuffer, pos geometry.Position) {
-	row := pos.Y
-	col := pos.X
+func (s *Span) Render(buf *tui.OutputBuffer, pos tui.Position) {
+	row := pos.Row
+	col := pos.Col
 	text := ""
 
 	for range s.padding {

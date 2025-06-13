@@ -1,7 +1,6 @@
 package paragraph
 
 import (
-	"gantry/geometry"
 	"gantry/tui"
 
 	"github.com/mattn/go-runewidth"
@@ -12,7 +11,7 @@ type Paragraph struct {
 	scroll int
 }
 
-func (p *Paragraph) Render(buf *tui.OutputBuffer, area geometry.Rect) {
+func (p *Paragraph) Render(buf *tui.OutputBuffer, area tui.Rect) {
 	remainingRows := area.Height
 	idx := 0
 
