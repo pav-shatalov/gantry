@@ -37,6 +37,7 @@ func main() {
 	var frames int
 	var renderCalls int
 	appWidget := AppWidget{model: &model}
+	ticker := time.NewTicker(1 * time.Second)
 
 	for {
 		defer func() {
@@ -57,6 +58,7 @@ func main() {
 
 		handleEvent(&messageBus, &terminal)
 		handleMsg(&messageBus, &model)
+		handleTick(ticker, &messageBus)
 
 		if !model.isRunning {
 			break
@@ -117,6 +119,14 @@ func handleMsg(msgBus *MessageBus, state *ApplicationModel) {
 		if cmd != nil {
 			go cmd(msgBus)
 		}
+	default:
+	}
+}
+
+func handleTick(ticker *time.Ticker, msgBus *MessageBus) {
+	select {
+	case <-ticker.C:
+		msgBus.send(TickMsg{})
 	default:
 	}
 }

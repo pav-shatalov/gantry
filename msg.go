@@ -18,6 +18,7 @@ type LoadContainerLogsMsg struct{}
 type EnterContainerMsg struct{}
 type ScrollUpMsg struct{}
 type ScrollDownMsg struct{}
+type TickMsg struct{}
 
 type MessageBus struct {
 	ch chan Msg

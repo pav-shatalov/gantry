@@ -9,9 +9,10 @@ import (
 )
 
 type LogsViewModel struct {
-	Lines  []string
-	Scroll int
-	area   geometry.Rect
+	Lines      []string
+	Scroll     int
+	area       geometry.Rect
+	AutoScroll bool
 }
 
 func wrappedLines(lines []string, w int) []string {
@@ -23,17 +24,28 @@ func wrappedLines(lines []string, w int) []string {
 
 func NewLogsViewModel(logs []string, area geometry.Rect) LogsViewModel {
 	lines := wrappedLines(logs, area.Width)
-	scroll := max(len(lines)-area.Height, 0)
+	scroll := scrollPosition(lines, area)
 
 	return LogsViewModel{
-		Lines:  lines,
-		Scroll: scroll,
-		area:   area,
+		Lines:      lines,
+		Scroll:     scroll,
+		area:       area,
+		AutoScroll: true,
 	}
 }
 
 func (m *LogsViewModel) SetLines(lines []string) {
 	m.Lines = wrappedLines(lines, m.area.Width)
-	scroll := max(len(m.Lines)-m.area.Height, 0)
-	m.Scroll = scroll
+	if m.AutoScroll {
+		m.Scroll = scrollPosition(m.Lines, m.area)
+	}
+}
+
+// TODO: should also update area
+func (m *LogsViewModel) Reflow() {
+	m.SetLines(m.Lines)
+}
+
+func scrollPosition(lines []string, area geometry.Rect) int {
+	return max(len(lines)-area.Height+10, 0)
 }
