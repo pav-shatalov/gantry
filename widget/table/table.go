@@ -1,4 +1,4 @@
-package widget
+package table
 
 import (
 	"gantry/layout"

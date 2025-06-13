@@ -1,47 +1,12 @@
-package widget
+package tui
 
 import (
-	"gantry/tui"
-
 	"github.com/gdamore/tcell/v2"
 )
 
-type borders struct {
-	topLeft     rune
-	top         rune
-	topRight    rune
-	right       rune
-	bottomRight rune
-	bottom      rune
-	bottomLeft  rune
-	left        rune
-}
-
-var SquareBorders = borders{
-	topLeft:     '┌',
-	top:         '─',
-	topRight:    '┐',
-	right:       '│',
-	bottomRight: '┘',
-	bottom:      '─',
-	bottomLeft:  '└',
-	left:        '│',
-}
-
-var RoundBorders = borders{
-	topLeft:     '╭',
-	top:         '─',
-	topRight:    '╮',
-	right:       '│',
-	bottomRight: '╯',
-	bottom:      '─',
-	bottomLeft:  '╰',
-	left:        '│',
-}
-
 type Block struct {
 	title       string
-	borders     borders
+	borders     Borders
 	titleStyle  tcell.Style
 	borderStyle tcell.Style
 }
@@ -70,7 +35,7 @@ func (b Block) TitleStyle(style tcell.Style) Block {
 	return b
 }
 
-func (b *Block) Render(screen tcell.Screen, area tui.Rect) {
+func (b *Block) Render(screen tcell.Screen, area Rect) {
 	b.renderLeftSide(screen, area)
 	b.renderTopSide(screen, area)
 	b.renderRightSide(screen, area)
@@ -84,7 +49,7 @@ func (b *Block) Render(screen tcell.Screen, area tui.Rect) {
 	b.renderTitle(screen, area)
 }
 
-func (b *Block) renderLeftSide(screen tcell.Screen, area tui.Rect) {
+func (b *Block) renderLeftSide(screen tcell.Screen, area Rect) {
 	col := area.Col
 	row := area.Row + 1
 	r := b.borders.right
@@ -94,7 +59,7 @@ func (b *Block) renderLeftSide(screen tcell.Screen, area tui.Rect) {
 	}
 }
 
-func (b *Block) renderTopSide(screen tcell.Screen, area tui.Rect) {
+func (b *Block) renderTopSide(screen tcell.Screen, area Rect) {
 	col := area.Col + 1
 	row := area.Row
 	r := b.borders.top
@@ -104,7 +69,7 @@ func (b *Block) renderTopSide(screen tcell.Screen, area tui.Rect) {
 	}
 }
 
-func (b *Block) renderRightSide(screen tcell.Screen, area tui.Rect) {
+func (b *Block) renderRightSide(screen tcell.Screen, area Rect) {
 	col := area.Col + area.Width - 1
 	row := area.Row + 1
 	r := b.borders.right
@@ -115,7 +80,7 @@ func (b *Block) renderRightSide(screen tcell.Screen, area tui.Rect) {
 	}
 }
 
-func (b *Block) renderBottomSide(screen tcell.Screen, area tui.Rect) {
+func (b *Block) renderBottomSide(screen tcell.Screen, area Rect) {
 	col := area.Col + 1
 	row := area.Row + area.Height - 1
 	r := b.borders.bottom
@@ -126,7 +91,7 @@ func (b *Block) renderBottomSide(screen tcell.Screen, area tui.Rect) {
 	}
 }
 
-func (b *Block) renderTopLeftCorner(screen tcell.Screen, area tui.Rect) {
+func (b *Block) renderTopLeftCorner(screen tcell.Screen, area Rect) {
 	screen.SetContent(
 		area.Col,
 		area.Row,
@@ -136,7 +101,7 @@ func (b *Block) renderTopLeftCorner(screen tcell.Screen, area tui.Rect) {
 	)
 }
 
-func (b *Block) renderTopRightCorner(screen tcell.Screen, area tui.Rect) {
+func (b *Block) renderTopRightCorner(screen tcell.Screen, area Rect) {
 	screen.SetContent(
 		area.Col+area.Width-1,
 		area.Row,
@@ -146,7 +111,7 @@ func (b *Block) renderTopRightCorner(screen tcell.Screen, area tui.Rect) {
 	)
 }
 
-func (b *Block) renderBottomRightCorner(screen tcell.Screen, area tui.Rect) {
+func (b *Block) renderBottomRightCorner(screen tcell.Screen, area Rect) {
 	screen.SetContent(
 		area.Col+area.Width-1,
 		area.Row+area.Height-1,
@@ -156,7 +121,7 @@ func (b *Block) renderBottomRightCorner(screen tcell.Screen, area tui.Rect) {
 	)
 }
 
-func (b *Block) renderBottomLeftCorner(screen tcell.Screen, area tui.Rect) {
+func (b *Block) renderBottomLeftCorner(screen tcell.Screen, area Rect) {
 	screen.SetContent(
 		area.Col,
 		area.Row+area.Height-1,
@@ -166,7 +131,7 @@ func (b *Block) renderBottomLeftCorner(screen tcell.Screen, area tui.Rect) {
 	)
 }
 
-func (b *Block) renderTitle(screen tcell.Screen, area tui.Rect) {
+func (b *Block) renderTitle(screen tcell.Screen, area Rect) {
 	if len(b.title) == 0 {
 		return
 	}
@@ -179,6 +144,6 @@ func (b *Block) renderTitle(screen tcell.Screen, area tui.Rect) {
 	}
 }
 
-func (b *Block) InnerArea(area tui.Rect) tui.Rect {
-	return tui.NewRect(area.Col+1, area.Row+1, area.Width-2, area.Height-2)
+func (b *Block) InnerArea(area Rect) Rect {
+	return NewRect(area.Col+1, area.Row+1, area.Width-2, area.Height-2)
 }
