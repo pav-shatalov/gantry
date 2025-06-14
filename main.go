@@ -99,9 +99,9 @@ func handleEvent(msgBus *MessageBus, terminal *tui.Terminal) {
 				msgBus.send(SelectNextContainerMsg{})
 			} else if ev.Key() == tcell.KeyCR {
 				msgBus.send(EnterContainerMsg{})
-			} else if ev.Key() == tcell.KeyCtrlD {
+			} else if ev.Key() == tcell.KeyCtrlD || ev.Key() == tcell.KeyPgDn {
 				msgBus.send(ScrollDownMsg{})
-			} else if ev.Key() == tcell.KeyCtrlU {
+			} else if ev.Key() == tcell.KeyCtrlU || ev.Key() == tcell.KeyPgUp {
 				msgBus.send(ScrollUpMsg{})
 			}
 		case *tcell.EventResize:
