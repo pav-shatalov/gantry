@@ -1,6 +1,22 @@
 package tui
 
-type Borders struct {
+type Borders uint8
+
+const (
+	TopBorder    Borders = 0b0001
+	RightBorder          = 0b0010
+	BottomBorder         = 0b0100
+	LeftBorder           = 0b1000
+)
+
+const NoBorders = 0b0000
+const AllBorders = 0b1111
+
+func (b *Borders) has(side Borders) bool {
+	return *b&side != 0
+}
+
+type BorderType struct {
 	topLeft     rune
 	top         rune
 	topRight    rune
@@ -13,9 +29,7 @@ type Borders struct {
 	height      int
 }
 
-var NoBorders = Borders{width: 0, height: 0}
-
-var SquareBorders = Borders{
+var SquareBordersType = BorderType{
 	topLeft:     '┌',
 	top:         '─',
 	topRight:    '┐',
@@ -24,11 +38,9 @@ var SquareBorders = Borders{
 	bottom:      '─',
 	bottomLeft:  '└',
 	left:        '│',
-	width:       1,
-	height:      1,
 }
 
-var RoundBorders = Borders{
+var RoundBordersType = BorderType{
 	topLeft:     '╭',
 	top:         '─',
 	topRight:    '╮',
@@ -37,6 +49,4 @@ var RoundBorders = Borders{
 	bottom:      '─',
 	bottomLeft:  '╰',
 	left:        '│',
-	width:       1,
-	height:      1,
 }

@@ -3,6 +3,7 @@ package tui
 type Block struct {
 	title       string
 	borders     Borders
+	borderType  BorderType
 	titleStyle  Style
 	borderStyle Style
 
@@ -17,6 +18,7 @@ func NewBlock() Block {
 	return Block{
 		title:         "",
 		borders:       NoBorders,
+		borderType:    SquareBordersType,
 		titleStyle:    StyleDefault,
 		borderStyle:   StyleDefault,
 		paddingTop:    0,
@@ -32,6 +34,10 @@ func (b *Block) Title(title string) {
 
 func (b *Block) Borders(borders Borders) {
 	b.borders = borders
+}
+
+func (b *Block) BorderType(t BorderType) {
+	b.borderType = t
 }
 
 func (b *Block) BorderStyle(style Style) {
@@ -50,34 +56,50 @@ func (b *Block) Padding(t int, r int, bot int, l int) {
 }
 
 func (b *Block) Render(buf *OutputBuffer, area Rect) {
-	b.renderLeftSide(buf, area)
-	b.renderTopSide(buf, area)
-	b.renderRightSide(buf, area)
-	b.renderBottomSide(buf, area)
+	if b.borders.has(LeftBorder) {
+		b.renderLeftSide(buf, area)
+	}
+	if b.borders.has(TopBorder) {
+		b.renderTopSide(buf, area)
+	}
+	if b.borders.has(RightBorder) {
+		b.renderRightSide(buf, area)
+	}
+	if b.borders.has(BottomBorder) {
+		b.renderBottomSide(buf, area)
+	}
 
-	b.renderTopLeftCorner(buf, area)
-	b.renderTopRightCorner(buf, area)
-	b.renderBottomRightCorner(buf, area)
-	b.renderBottomLeftCorner(buf, area)
+	if b.borders.has(TopBorder) && b.borders.has(LeftBorder) {
+		b.renderTopLeftCorner(buf, area)
+	}
+	if b.borders.has(TopBorder) && b.borders.has(RightBorder) {
+		b.renderTopRightCorner(buf, area)
+	}
+	if b.borders.has(BottomBorder) && b.borders.has(RightBorder) {
+		b.renderBottomRightCorner(buf, area)
+	}
+	if b.borders.has(BottomBorder) && b.borders.has(LeftBorder) {
+		b.renderBottomLeftCorner(buf, area)
+	}
 
 	b.renderTitle(buf, area)
 }
 
 func (b *Block) renderLeftSide(buf *OutputBuffer, area Rect) {
 	col := area.Col
-	row := area.Row + 1
-	r := b.borders.right
-	for range area.Height - 2 {
+	row := area.Row
+	r := b.borderType.right
+	for range area.Height {
 		buf.SetContent(col, row, r, b.borderStyle)
 		row++
 	}
 }
 
 func (b *Block) renderTopSide(buf *OutputBuffer, area Rect) {
-	col := area.Col + 1
+	col := area.Col
 	row := area.Row
-	r := b.borders.top
-	for range area.Width - 2 {
+	r := b.borderType.top
+	for range area.Width {
 		buf.SetContent(col, row, r, b.borderStyle)
 		col++
 	}
@@ -85,21 +107,21 @@ func (b *Block) renderTopSide(buf *OutputBuffer, area Rect) {
 
 func (b *Block) renderRightSide(buf *OutputBuffer, area Rect) {
 	col := area.Col + area.Width - 1
-	row := area.Row + 1
-	r := b.borders.right
+	row := area.Row
+	r := b.borderType.right
 
-	for range area.Height - 2 {
+	for range area.Height {
 		buf.SetContent(col, row, r, b.borderStyle)
 		row++
 	}
 }
 
 func (b *Block) renderBottomSide(buf *OutputBuffer, area Rect) {
-	col := area.Col + 1
+	col := area.Col
 	row := area.Row + area.Height - 1
-	r := b.borders.bottom
+	r := b.borderType.bottom
 
-	for range area.Width - 2 {
+	for range area.Width {
 		buf.SetContent(col, row, r, b.borderStyle)
 		col++
 	}
@@ -109,7 +131,7 @@ func (b *Block) renderTopLeftCorner(buf *OutputBuffer, area Rect) {
 	buf.SetContent(
 		area.Col,
 		area.Row,
-		b.borders.topLeft,
+		b.borderType.topLeft,
 		b.borderStyle,
 	)
 }
@@ -118,7 +140,7 @@ func (b *Block) renderTopRightCorner(buf *OutputBuffer, area Rect) {
 	buf.SetContent(
 		area.Col+area.Width-1,
 		area.Row,
-		b.borders.topRight,
+		b.borderType.topRight,
 		b.borderStyle,
 	)
 }
@@ -127,7 +149,7 @@ func (b *Block) renderBottomRightCorner(buf *OutputBuffer, area Rect) {
 	buf.SetContent(
 		area.Col+area.Width-1,
 		area.Row+area.Height-1,
-		b.borders.bottomRight,
+		b.borderType.bottomRight,
 		b.borderStyle,
 	)
 }
@@ -136,7 +158,7 @@ func (b *Block) renderBottomLeftCorner(buf *OutputBuffer, area Rect) {
 	buf.SetContent(
 		area.Col,
 		area.Row+area.Height-1,
-		b.borders.bottomLeft,
+		b.borderType.bottomLeft,
 		b.borderStyle,
 	)
 }
@@ -145,7 +167,7 @@ func (b *Block) renderTitle(buf *OutputBuffer, area Rect) {
 	if len(b.title) == 0 {
 		return
 	}
-	col := area.Col + 2
+	col := area.Col + 1
 	row := area.Row
 	title := " " + b.title + " "
 	for _, c := range title {
@@ -155,12 +177,26 @@ func (b *Block) renderTitle(buf *OutputBuffer, area Rect) {
 }
 
 func (b *Block) InnerArea(area Rect) Rect {
-	bWidth := b.borders.width
-	bHeight := b.borders.height
+	lbWidth := 0
+	rbWidth := 0
+	if b.borders.has(LeftBorder) {
+		lbWidth = 1
+	}
+	if b.borders.has(RightBorder) {
+		rbWidth = 1
+	}
+	tbHeight := 0
+	bbHeight := 0
+	if b.borders.has(TopBorder) {
+		tbHeight = 1
+	}
+	if b.borders.has(BottomBorder) {
+		bbHeight = 1
+	}
 	return NewRect(
-		area.Col+bWidth+b.paddingLeft,
-		area.Row+bHeight+b.paddingTop,
-		area.Width-bWidth*2-b.paddingLeft+b.paddingRight,
-		area.Height-bHeight*2-b.paddingTop+b.paddingBottom,
+		area.Col+lbWidth+b.paddingLeft,
+		area.Row+tbHeight+b.paddingTop,
+		area.Width-lbWidth+rbWidth-b.paddingLeft+b.paddingRight,
+		area.Height-tbHeight+bbHeight-b.paddingTop+b.paddingBottom,
 	)
 }

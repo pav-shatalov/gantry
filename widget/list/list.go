@@ -3,22 +3,25 @@ package list
 import (
 	"gantry/tui"
 	"gantry/widget/span"
-
 	runewidth "github.com/mattn/go-runewidth"
 )
 
 type List struct {
+	tui.Block
 	options  []string
-	selected any
+	selected int
 }
 
 func New(options []string, selectedIdx int) List {
-	return List{options: options, selected: selectedIdx}
+	return List{options: options, selected: selectedIdx, Block: tui.NewBlock()}
 }
 
 func (s *List) Render(buf *tui.OutputBuffer, area tui.Rect) {
-	col := area.Col
-	row := area.Row
+	s.Block.Render(buf, area)
+	a := s.Block.InnerArea(area)
+
+	col := a.Col
+	row := a.Row
 
 	for itemIdx, item := range s.options {
 		isSelected := itemIdx == s.selected
@@ -34,7 +37,7 @@ func (s *List) Render(buf *tui.OutputBuffer, area tui.Rect) {
 		}
 		sp.Render(buf, tui.NewPosition(col, row))
 
-		col = area.Col
+		col = a.Col
 		row++
 	}
 }

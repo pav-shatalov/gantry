@@ -24,7 +24,7 @@ func wrappedLines(lines []string, w int) []string {
 
 func NewLogsViewModel(logs []string, area tui.Rect) LogsViewModel {
 	// TODO: replace hardcoded padding
-	lines := wrappedLines(logs, area.Width-4)
+	lines := wrappedLines(logs, area.Width-3)
 	scroll := scrollPosition(lines, area)
 
 	return LogsViewModel{
