@@ -3,16 +3,19 @@ package paragraph
 import (
 	"gantry/tui"
 
-	"github.com/mattn/go-runewidth"
+	"github.com/rivo/uniseg"
 )
 
 type Paragraph struct {
+	tui.Block
 	lines  []string
 	scroll int
 }
 
 func (p *Paragraph) Render(buf *tui.OutputBuffer, area tui.Rect) {
-	remainingRows := area.Height
+	p.Block.Render(buf, area)
+	a := p.InnerArea(area)
+	remainingRows := a.Height
 	idx := 0
 
 	for y := p.scroll; y < len(p.lines); y++ {
@@ -20,14 +23,17 @@ func (p *Paragraph) Render(buf *tui.OutputBuffer, area tui.Rect) {
 			break
 		}
 
-		remainingCols := area.Width
-		for x, r := range p.lines[y] {
+		remainingCols := a.Width
+		line := uniseg.NewGraphemes(p.lines[y])
+		x := 0
+		for line.Next() {
+			r := line.Runes()
 			if remainingCols == 0 {
 				break
 			}
 
-			buf.SetContent(x+area.Col, area.Row+idx, r, tui.StyleDefault)
-			w := max(runewidth.RuneWidth(r), 1)
+			buf.SetContent(x+a.Col, idx+a.Row, r[0], tui.StyleDefault)
+			w := line.Width()
 			remainingCols -= w
 			x += w
 		}
@@ -37,10 +43,9 @@ func (p *Paragraph) Render(buf *tui.OutputBuffer, area tui.Rect) {
 }
 
 func New(lines []string) Paragraph {
-	return Paragraph{lines: lines, scroll: 0}
+	return Paragraph{lines: lines, scroll: 0, Block: tui.NewBlock()}
 }
 
-func (p Paragraph) Scroll(s int) Paragraph {
+func (p *Paragraph) Scroll(s int) {
 	p.scroll = s
-	return p
 }

@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"gantry/tui"
-	"gantry/widget/divider"
 	"gantry/widget/list"
 	"gantry/widget/paragraph"
 )
@@ -25,15 +24,15 @@ func (a AppWidget) Render(buf *tui.OutputBuffer, area tui.Rect) {
 		),
 	})
 
-	// containerLogsBlock := container.New(a.model.layoutModel.LogsArea, geometry.Position{X: 0, Y: 0}).WithPadding(0, 0, 0, 1)
 	containerList := list.New(a.model.ContainerNames(), a.model.selectedContainerIdx)
-	containerInfo := paragraph.New(a.model.logsModel.Lines).Scroll(a.model.logsModel.Scroll)
-
-	divider := divider.NewVertical()
+	containerInfo := paragraph.New(a.model.logsModel.Lines)
+	containerInfo.Borders(tui.RoundBorders)
+	containerInfo.BorderStyle(tui.StyleDefault.Fg(tui.ColorBlack))
+	containerInfo.Padding(0, 1, 0, 1)
+	containerInfo.Scroll(a.model.logsModel.Scroll)
 
 	headerInfo.Render(buf, a.model.layoutModel.HeaderArea)
 	debugInfo.Render(buf, a.model.layoutModel.BottomArea)
 	containerList.Render(buf, a.model.layoutModel.ContainerListArea)
-	divider.Render(buf, a.model.layoutModel.VerticalDividerArea)
 	containerInfo.Render(buf, a.model.layoutModel.LogsArea)
 }

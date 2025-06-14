@@ -9,7 +9,11 @@ type Borders struct {
 	bottom      rune
 	bottomLeft  rune
 	left        rune
+	width       int
+	height      int
 }
+
+var NoBorders = Borders{width: 0, height: 0}
 
 var SquareBorders = Borders{
 	topLeft:     '┌',
@@ -20,6 +24,8 @@ var SquareBorders = Borders{
 	bottom:      '─',
 	bottomLeft:  '└',
 	left:        '│',
+	width:       1,
+	height:      1,
 }
 
 var RoundBorders = Borders{
@@ -31,4 +37,6 @@ var RoundBorders = Borders{
 	bottom:      '─',
 	bottomLeft:  '╰',
 	left:        '│',
+	width:       1,
+	height:      1,
 }

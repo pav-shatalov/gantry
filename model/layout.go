@@ -6,11 +6,10 @@ import (
 )
 
 type LayoutModel struct {
-	HeaderArea          tui.Rect
-	BottomArea          tui.Rect
-	ContainerListArea   tui.Rect
-	VerticalDividerArea tui.Rect
-	LogsArea            tui.Rect
+	HeaderArea        tui.Rect
+	BottomArea        tui.Rect
+	ContainerListArea tui.Rect
+	LogsArea          tui.Rect
 }
 
 func NewLayoutModel(area tui.Rect) LayoutModel {
@@ -23,15 +22,13 @@ func NewLayoutModel(area tui.Rect) LayoutModel {
 
 	midAreaSplit := layout.NewHorizontal(verticalAreas[1]).Constraints([]layout.Constraint{
 		layout.NewPercentage(30),
-		layout.NewLength(1),
 		layout.NewPercentage(70),
 	}).Areas()
 
 	return LayoutModel{
-		HeaderArea:          verticalAreas[0],
-		BottomArea:          verticalAreas[2],
-		ContainerListArea:   midAreaSplit[0],
-		VerticalDividerArea: midAreaSplit[1],
-		LogsArea:            midAreaSplit[2],
+		HeaderArea:        verticalAreas[0],
+		BottomArea:        verticalAreas[2],
+		ContainerListArea: midAreaSplit[0],
+		LogsArea:          midAreaSplit[1],
 	}
 }

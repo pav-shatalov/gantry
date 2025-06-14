@@ -1,137 +1,147 @@
 package tui
 
-import (
-	"github.com/gdamore/tcell/v2"
-)
-
 type Block struct {
 	title       string
 	borders     Borders
-	titleStyle  tcell.Style
-	borderStyle tcell.Style
+	titleStyle  Style
+	borderStyle Style
+
+	// Padding
+	paddingLeft   int
+	paddingRight  int
+	paddingTop    int
+	paddingBottom int
 }
 
 func NewBlock() Block {
 	return Block{
-		title:       "",
-		borders:     RoundBorders,
-		titleStyle:  tcell.StyleDefault,
-		borderStyle: tcell.StyleDefault,
+		title:         "",
+		borders:       NoBorders,
+		titleStyle:    StyleDefault,
+		borderStyle:   StyleDefault,
+		paddingTop:    0,
+		paddingRight:  0,
+		paddingBottom: 0,
+		paddingLeft:   0,
 	}
 }
 
-func (b Block) Title(title string) Block {
+func (b *Block) Title(title string) {
 	b.title = title
-	return b
 }
 
-func (b Block) BorderStyle(style tcell.Style) Block {
+func (b *Block) Borders(borders Borders) {
+	b.borders = borders
+}
+
+func (b *Block) BorderStyle(style Style) {
 	b.borderStyle = style
-	return b
 }
 
-func (b Block) TitleStyle(style tcell.Style) Block {
+func (b *Block) TitleStyle(style Style) {
 	b.titleStyle = style
-	return b
 }
 
-func (b *Block) Render(screen tcell.Screen, area Rect) {
-	b.renderLeftSide(screen, area)
-	b.renderTopSide(screen, area)
-	b.renderRightSide(screen, area)
-	b.renderBottomSide(screen, area)
-
-	b.renderTopLeftCorner(screen, area)
-	b.renderTopRightCorner(screen, area)
-	b.renderBottomRightCorner(screen, area)
-	b.renderBottomLeftCorner(screen, area)
-
-	b.renderTitle(screen, area)
+func (b *Block) Padding(t int, r int, bot int, l int) {
+	b.paddingTop = t
+	b.paddingRight = r
+	b.paddingBottom = bot
+	b.paddingLeft = l
 }
 
-func (b *Block) renderLeftSide(screen tcell.Screen, area Rect) {
+func (b *Block) Render(buf *OutputBuffer, area Rect) {
+	b.renderLeftSide(buf, area)
+	b.renderTopSide(buf, area)
+	b.renderRightSide(buf, area)
+	b.renderBottomSide(buf, area)
+
+	b.renderTopLeftCorner(buf, area)
+	b.renderTopRightCorner(buf, area)
+	b.renderBottomRightCorner(buf, area)
+	b.renderBottomLeftCorner(buf, area)
+
+	b.renderTitle(buf, area)
+}
+
+func (b *Block) renderLeftSide(buf *OutputBuffer, area Rect) {
 	col := area.Col
 	row := area.Row + 1
 	r := b.borders.right
 	for range area.Height - 2 {
-		screen.SetContent(col, row, r, []rune{}, b.borderStyle)
+		buf.SetContent(col, row, r, b.borderStyle)
 		row++
 	}
 }
 
-func (b *Block) renderTopSide(screen tcell.Screen, area Rect) {
+func (b *Block) renderTopSide(buf *OutputBuffer, area Rect) {
 	col := area.Col + 1
 	row := area.Row
 	r := b.borders.top
 	for range area.Width - 2 {
-		screen.SetContent(col, row, r, []rune{}, b.borderStyle)
+		buf.SetContent(col, row, r, b.borderStyle)
 		col++
 	}
 }
 
-func (b *Block) renderRightSide(screen tcell.Screen, area Rect) {
+func (b *Block) renderRightSide(buf *OutputBuffer, area Rect) {
 	col := area.Col + area.Width - 1
 	row := area.Row + 1
 	r := b.borders.right
 
 	for range area.Height - 2 {
-		screen.SetContent(col, row, r, []rune{}, b.borderStyle)
+		buf.SetContent(col, row, r, b.borderStyle)
 		row++
 	}
 }
 
-func (b *Block) renderBottomSide(screen tcell.Screen, area Rect) {
+func (b *Block) renderBottomSide(buf *OutputBuffer, area Rect) {
 	col := area.Col + 1
 	row := area.Row + area.Height - 1
 	r := b.borders.bottom
 
 	for range area.Width - 2 {
-		screen.SetContent(col, row, r, []rune{}, b.borderStyle)
+		buf.SetContent(col, row, r, b.borderStyle)
 		col++
 	}
 }
 
-func (b *Block) renderTopLeftCorner(screen tcell.Screen, area Rect) {
-	screen.SetContent(
+func (b *Block) renderTopLeftCorner(buf *OutputBuffer, area Rect) {
+	buf.SetContent(
 		area.Col,
 		area.Row,
 		b.borders.topLeft,
-		[]rune{},
 		b.borderStyle,
 	)
 }
 
-func (b *Block) renderTopRightCorner(screen tcell.Screen, area Rect) {
-	screen.SetContent(
+func (b *Block) renderTopRightCorner(buf *OutputBuffer, area Rect) {
+	buf.SetContent(
 		area.Col+area.Width-1,
 		area.Row,
 		b.borders.topRight,
-		[]rune{},
 		b.borderStyle,
 	)
 }
 
-func (b *Block) renderBottomRightCorner(screen tcell.Screen, area Rect) {
-	screen.SetContent(
+func (b *Block) renderBottomRightCorner(buf *OutputBuffer, area Rect) {
+	buf.SetContent(
 		area.Col+area.Width-1,
 		area.Row+area.Height-1,
 		b.borders.bottomRight,
-		[]rune{},
 		b.borderStyle,
 	)
 }
 
-func (b *Block) renderBottomLeftCorner(screen tcell.Screen, area Rect) {
-	screen.SetContent(
+func (b *Block) renderBottomLeftCorner(buf *OutputBuffer, area Rect) {
+	buf.SetContent(
 		area.Col,
 		area.Row+area.Height-1,
 		b.borders.bottomLeft,
-		[]rune{},
 		b.borderStyle,
 	)
 }
 
-func (b *Block) renderTitle(screen tcell.Screen, area Rect) {
+func (b *Block) renderTitle(buf *OutputBuffer, area Rect) {
 	if len(b.title) == 0 {
 		return
 	}
@@ -139,11 +149,18 @@ func (b *Block) renderTitle(screen tcell.Screen, area Rect) {
 	row := area.Row
 	title := " " + b.title + " "
 	for _, c := range title {
-		screen.SetContent(col, row, c, []rune{}, b.titleStyle)
+		buf.SetContent(col, row, c, b.titleStyle)
 		col++
 	}
 }
 
 func (b *Block) InnerArea(area Rect) Rect {
-	return NewRect(area.Col+1, area.Row+1, area.Width-2, area.Height-2)
+	bWidth := b.borders.width
+	bHeight := b.borders.height
+	return NewRect(
+		area.Col+bWidth+b.paddingLeft,
+		area.Row+bHeight+b.paddingTop,
+		area.Width-bWidth*2-b.paddingLeft+b.paddingRight,
+		area.Height-bHeight*2-b.paddingTop+b.paddingBottom,
+	)
 }

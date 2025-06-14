@@ -86,12 +86,16 @@ func (s *ApplicationModel) Update(msg Msg) Cmd {
 		if len(s.containers)-1 > s.selectedContainerIdx {
 			s.selectedContainerIdx++
 			cmd = NewCmd(LoadContainerLogsMsg{})
+			s.logsModel.AutoScroll = true
+			s.logsModel.Scroll = 0
 		}
 	case SelectPrevContainerMsg:
 		s.shouldRedraw = true
 		if s.selectedContainerIdx > 0 {
 			s.selectedContainerIdx--
 			cmd = NewCmd(LoadContainerLogsMsg{})
+			s.logsModel.AutoScroll = true
+			s.logsModel.Scroll = 0
 		}
 	case EnterContainerMsg:
 		s.isRunning = false
