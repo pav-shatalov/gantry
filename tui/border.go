@@ -17,36 +17,28 @@ func (b *Borders) has(side Borders) bool {
 }
 
 type BorderType struct {
-	topLeft     rune
-	top         rune
-	topRight    rune
-	right       rune
-	bottomRight rune
-	bottom      rune
-	bottomLeft  rune
-	left        rune
-	width       int
-	height      int
+	topLeftCorner     rune
+	horizontal        rune
+	topRightCorner    rune
+	vertical          rune
+	bottomRightCorner rune
+	bottomLeftCorner  rune
 }
 
 var SquareBordersType = BorderType{
-	topLeft:     '┌',
-	top:         '─',
-	topRight:    '┐',
-	right:       '│',
-	bottomRight: '┘',
-	bottom:      '─',
-	bottomLeft:  '└',
-	left:        '│',
+	topLeftCorner:     '┌',
+	bottomLeftCorner:  '└',
+	topRightCorner:    '┐',
+	bottomRightCorner: '┘',
+	horizontal:        '─',
+	vertical:          '│',
 }
 
 var RoundBordersType = BorderType{
-	topLeft:     '╭',
-	top:         '─',
-	topRight:    '╮',
-	right:       '│',
-	bottomRight: '╯',
-	bottom:      '─',
-	bottomLeft:  '╰',
-	left:        '│',
+	topLeftCorner:     '╭',
+	bottomLeftCorner:  '╰',
+	topRightCorner:    '╮',
+	bottomRightCorner: '╯',
+	horizontal:        '─',
+	vertical:          '│',
 }
