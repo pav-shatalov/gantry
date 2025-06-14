@@ -105,7 +105,11 @@ func handleEvent(msgBus *MessageBus, terminal *tui.Terminal) {
 				msgBus.send(ScrollUpMsg{})
 			}
 		case *tcell.EventResize:
-			msgBus.send(ResizeMsg{})
+			w, h := terminal.Screen.Size()
+			terminal.Area = tui.NewRect(0, 0, w, h)
+			msgBus.send(ResizeMsg{
+				area: terminal.Area,
+			})
 		}
 	default:
 	}

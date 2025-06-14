@@ -14,10 +14,10 @@ import (
 )
 
 type Container struct {
-	Id     string
-	Name   string
-	Image  string
-	Status string
+	Id    string
+	Name  string
+	Image string
+	State string
 }
 
 func (c Container) String() string {
@@ -57,10 +57,10 @@ func (c Client) LoadContainerList() ([]Container, error) {
 
 	for _, ctr := range dockerContainers {
 		containers = append(containers, Container{
-			Id:     ctr.ID,
-			Name:   strings.Trim(strings.Join(ctr.Names, "|"), "/"),
-			Image:  ctr.Image,
-			Status: ctr.Status,
+			Id:    ctr.ID,
+			Name:  strings.Trim(strings.Join(ctr.Names, "|"), "/"),
+			Image: ctr.Image,
+			State: ctr.State,
 		})
 	}
 

@@ -9,6 +9,7 @@ import (
 )
 
 type LogsViewModel struct {
+	Logs       []string
 	Lines      []string
 	Scroll     int
 	area       tui.Rect
@@ -24,7 +25,7 @@ func wrappedLines(lines []string, w int) []string {
 
 func NewLogsViewModel(logs []string, area tui.Rect) LogsViewModel {
 	// TODO: replace hardcoded padding
-	lines := wrappedLines(logs, area.Width-3)
+	lines := wrappedLines(logs, area.Width)
 	scroll := scrollPosition(lines, area)
 
 	return LogsViewModel{
@@ -36,15 +37,15 @@ func NewLogsViewModel(logs []string, area tui.Rect) LogsViewModel {
 }
 
 func (m *LogsViewModel) SetLines(lines []string) {
-	m.Lines = wrappedLines(lines, m.area.Width-4)
+	m.Lines = wrappedLines(lines, m.area.Width)
 	if m.AutoScroll {
 		m.Scroll = scrollPosition(m.Lines, m.area)
 	}
 }
 
-// TODO: should also update area
-func (m *LogsViewModel) Reflow() {
-	m.SetLines(m.Lines)
+func (m *LogsViewModel) Reflow(area tui.Rect) {
+	m.area = area
+	m.SetLines(m.Logs)
 }
 
 func scrollPosition(lines []string, area tui.Rect) int {

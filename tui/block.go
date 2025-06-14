@@ -175,7 +175,7 @@ func (b *Block) renderTitle(buf *OutputBuffer, area Rect) {
 	// if b.borders.has(TopBorder) {
 	// 	row += 1
 	// }
-	title := " " + b.title + " "
+	title := b.title + " "
 	for _, c := range title {
 		buf.SetContent(col, row, c, b.titleStyle)
 		// buf.SetContent(col, row+1, '🭶', b.borderStyle)

@@ -1,10 +1,16 @@
 package main
 
-import "github.com/gdamore/tcell/v2"
+import (
+	"gantry/tui"
+
+	"github.com/gdamore/tcell/v2"
+)
 
 type Msg any
 
-type ResizeMsg struct{}
+type ResizeMsg struct {
+	area tui.Rect
+}
 type ExitMsg struct{}
 type KeyPressMsg struct {
 	KeyString string
