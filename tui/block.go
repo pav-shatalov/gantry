@@ -169,16 +169,13 @@ func (b *Block) renderTitle(buf *OutputBuffer, area Rect) {
 	}
 	col := area.Col
 	row := area.Row
-	// if b.borders.has(LeftBorder) {
-	// 	col += 1 + b.paddingLeft
-	// }
-	// if b.borders.has(TopBorder) {
-	// 	row += 1
-	// }
 	title := b.title + " "
+	if b.borders.has(LeftBorder) {
+		col += 1
+		title = " " + title
+	}
 	for _, c := range title {
 		buf.SetContent(col, row, c, b.titleStyle)
-		// buf.SetContent(col, row+1, '🭶', b.borderStyle)
 		col++
 	}
 }
@@ -201,9 +198,9 @@ func (b *Block) InnerArea(area Rect) Rect {
 	if b.borders.has(BottomBorder) {
 		bbHeight = 1
 	}
-	// if b.title != "" {
-	// 	titleHeight = 2
-	// }
+	if b.title != "" && !b.borders.has(TopBorder) {
+		titleHeight = 1
+	}
 	return NewRect(
 		area.Col+lbWidth+b.paddingLeft,
 		area.Row+tbHeight+b.paddingTop+titleHeight,

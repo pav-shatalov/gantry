@@ -8,27 +8,19 @@ import (
 	"runtime/debug"
 	"time"
 
-	// "net/http"
-	// _ "net/http/pprof"
-
 	"github.com/gdamore/tcell/v2"
 
 	"gantry/tui"
 )
 
 func main() {
-	// go func() {
-	// 	http.ListenAndServe(":6060", nil)
-	// }()
 	log.SetFlags(log.Lshortfile | log.LstdFlags)
-	log.Printf("Starting app")
 	messageBus := NewMessageBus()
 	messageBus.send(LoadContainerListMsg{})
 	terminal, err := tui.InitTerminal()
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("Creating model")
 
 	model, err := NewModel(terminal.Area)
 	if err != nil {
@@ -68,10 +60,6 @@ func main() {
 	}
 
 	terminal.RestoreTerm()
-	duration := time.Since(model.startTime)
-	fps := int(float64(frames) / duration.Seconds())
-	fmt.Printf("FPS: %d\n", fps)
-	fmt.Printf("Render calls: %d\n", renderCalls)
 
 	if model.next != "" {
 		cmd := exec.Command("docker", "exec", "-ti", model.next, "bash")

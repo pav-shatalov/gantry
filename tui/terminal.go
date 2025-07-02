@@ -15,8 +15,11 @@ type Terminal struct {
 
 func colorMap() map[Color]tcell.Color {
 	colorMap := map[Color]tcell.Color{
-		ColorReset: tcell.ColorReset,
-		ColorBlack: tcell.ColorBlack,
+		ColorReset:  tcell.ColorReset,
+		ColorBlack:  tcell.ColorBlack,
+		ColorBlue:   tcell.ColorBlue,
+		ColorRed:    tcell.ColorRed,
+		ColorYellow: tcell.ColorYellow,
 	}
 
 	return colorMap

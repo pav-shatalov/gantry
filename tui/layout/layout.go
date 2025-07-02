@@ -1,8 +1,8 @@
 package layout
 
 import (
-	"gantry/cassowary"
 	"gantry/tui"
+	"gantry/tui/cassowary"
 	"math"
 )
 

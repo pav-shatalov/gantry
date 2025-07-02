@@ -1,8 +1,8 @@
 package model
 
 import (
-	"gantry/layout"
 	"gantry/tui"
+	"gantry/tui/layout"
 )
 
 type LayoutModel struct {

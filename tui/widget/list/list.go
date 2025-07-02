@@ -2,7 +2,7 @@ package list
 
 import (
 	"gantry/tui"
-	"gantry/widget/span"
+	"gantry/tui/widget/span"
 	runewidth "github.com/mattn/go-runewidth"
 )
 
@@ -25,15 +25,17 @@ func (s *List) Render(buf *tui.OutputBuffer, area tui.Rect) {
 
 	for itemIdx, item := range s.options {
 		isSelected := itemIdx == s.selected
+		sp := span.New(item).Padding(1)
 		if isSelected {
 			marker := '›'
-			markerSpan := span.New(string(marker))
+			markerSpan := span.New(string(marker)).
+				Style(tui.StyleDefault.Fg(tui.ColorYellow))
 			markerSpan.Render(buf, tui.NewPosition(col, row))
 			col += runewidth.RuneWidth(marker)
+			sp.SetStyle(tui.StyleDefault.Fg(tui.ColorYellow))
 		}
-		sp := span.New(item).Padding(1)
 		if !isSelected {
-			sp = sp.Padding(2)
+			sp.SetPadding(2)
 		}
 		sp.Render(buf, tui.NewPosition(col, row))
 

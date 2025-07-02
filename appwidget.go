@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"gantry/tui"
-	"gantry/widget/list"
-	"gantry/widget/paragraph"
+	"gantry/tui/widget/list"
+	"gantry/tui/widget/paragraph"
 )
 
 type AppWidget struct {
@@ -26,14 +26,14 @@ func (a AppWidget) Render(buf *tui.OutputBuffer, area tui.Rect) {
 
 	containerList := list.New(a.model.containersModel.Lines(), a.model.containersModel.SelectedContainerIdx)
 	containerList.Title("Containers")
-	containerList.Borders(tui.BottomBorder | tui.TopBorder)
+	containerList.Borders(tui.AllBorders)
 	containerList.BorderStyle(tui.StyleDefault.Fg(tui.ColorBlack))
 
 	containerInfo := paragraph.New(a.model.logsModel.Lines)
 	containerInfo.Title("Logs")
-	containerInfo.Borders(tui.BottomBorder | tui.TopBorder)
+	containerInfo.Borders(tui.AllBorders)
 	containerInfo.BorderStyle(tui.StyleDefault.Fg(tui.ColorBlack))
-	// containerInfo.Padding(0, 1, 0, 1)
+	containerInfo.Padding(0, 1, 0, 1)
 	containerInfo.Scroll(a.model.logsModel.Scroll)
 
 	headerInfo.Render(buf, a.model.layoutModel.HeaderArea)
