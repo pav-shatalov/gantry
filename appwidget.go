@@ -26,8 +26,8 @@ func (a AppWidget) Render(buf *tui.OutputBuffer, area tui.Rect) {
 
 	containerList := list.New(a.model.containersModel.Lines(), a.model.containersModel.SelectedContainerIdx)
 	containerList.Title("Containers")
-	containerList.Borders(tui.AllBorders)
-	containerList.BorderStyle(tui.StyleDefault.Fg(tui.ColorBlack))
+	// containerList.Borders(tui.AllBorders)
+	// containerList.BorderStyle(tui.StyleDefault.Fg(tui.ColorBlack))
 
 	containerInfo := paragraph.New(a.model.logsModel.Lines)
 	containerInfo.Title("Logs")

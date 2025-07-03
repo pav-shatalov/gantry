@@ -12,15 +12,16 @@ type LogsViewModel struct {
 	Logs       []string
 	Lines      []string
 	Scroll     int
-	area       tui.Rect
+	Area       tui.Rect
 	AutoScroll bool
 }
 
 func wrappedLines(lines []string, w int) []string {
+	asString := strings.Join(lines, "\n")
 	re := regexp.MustCompile("[\u001B\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[a-zA-Z\\d]*)*)?\u0007)|(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PRZcf-ntqry=><~]))")
-	logsAsText := strings.Join(lines, "\n")
-	asText := re.ReplaceAllString(logsAsText, "")
-	return strings.Split(wrap.String(asText, w), "\n")
+	withoutAnsi := re.ReplaceAllString(asString, "")
+	wrapped := wrap.String(withoutAnsi, w-4) // borders + padding
+	return strings.Split(wrapped, "\n")
 }
 
 func NewLogsViewModel(logs []string, area tui.Rect) LogsViewModel {
@@ -30,20 +31,20 @@ func NewLogsViewModel(logs []string, area tui.Rect) LogsViewModel {
 	return LogsViewModel{
 		Lines:      lines,
 		Scroll:     scroll,
-		area:       area,
+		Area:       area,
 		AutoScroll: true,
 	}
 }
 
 func (m *LogsViewModel) SetLines(lines []string) {
-	m.Lines = wrappedLines(lines, m.area.Width)
+	m.Lines = wrappedLines(lines, m.Area.Width)
 	if m.AutoScroll {
-		m.Scroll = scrollPosition(m.Lines, m.area)
+		m.Scroll = scrollPosition(m.Lines, m.Area)
 	}
 }
 
 func (m *LogsViewModel) Reflow(area tui.Rect) {
-	m.area = area
+	m.Area = area
 	m.SetLines(m.Logs)
 }
 

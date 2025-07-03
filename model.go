@@ -104,15 +104,15 @@ func (s *ApplicationModel) Update(msg Msg) Cmd {
 		s.logsModel.Reflow(s.layoutModel.LogsArea)
 		s.shouldRedraw = true
 	case ScrollDownMsg:
-		s.logsModel.Scroll += 5
+		s.logsModel.Scroll += s.logsModel.Area.Height / 2
 		s.logsModel.AutoScroll = false
 		if s.logsModel.Scroll > len(s.logsModel.Lines)-1 {
-			s.logsModel.Scroll = len(s.logsModel.Lines) + 10
+			s.logsModel.Scroll = len(s.logsModel.Lines) - 1
 
 		}
 		s.shouldRedraw = true
 	case ScrollUpMsg:
-		s.logsModel.Scroll -= 5
+		s.logsModel.Scroll -= s.logsModel.Area.Height
 		s.logsModel.AutoScroll = false
 		if s.logsModel.Scroll < 0 {
 			s.logsModel.Scroll = 0
